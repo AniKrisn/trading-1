@@ -105,8 +105,13 @@
 }
 
 @keyframes ring-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 .map-player {
@@ -140,6 +145,24 @@
   background-color: #f7e396 !important;
 }
 
+.legend-current {
+  color: var(--current-town);
+}
+
+.legend-traveling {
+  animation: blink-blue 2s ease-in-out infinite;
+}
+
+@keyframes blink-blue {
+  0%,
+  100% {
+    color: var(--current-town);
+  }
+  50% {
+    color: var(--muted);
+  }
+}
+
 .legend-dim {
   opacity: 0.6;
 }
@@ -150,17 +173,33 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  width: fit-content;
+  margin: 0 auto;
 }
 
 .market-row {
   display: grid;
-  grid-template-columns: 10ch 9ch 9ch 4ch;
+  grid-template-columns: 10ch 6ch 6ch 4ch;
   gap: 0 0.5ch;
   align-items: baseline;
 }
 
-.good-name {
-  /* left-aligned by default */
+.held-col {
+  justify-self: end;
+  text-align: right;
+}
+
+.market-header {
+  color: var(--muted);
+}
+
+.market-header > span {
+  font-size: 0.8rem;
+}
+
+.market-sep {
+  border-top: 1px solid var(--muted);
+  opacity: 0.3;
 }
 
 .trade-btn {
@@ -203,6 +242,7 @@
 
 .held {
   color: var(--muted);
+  justify-self: end;
   text-align: right;
   font-size: 0.85rem;
 }
@@ -211,6 +251,7 @@
 
 .qty-row {
   display: flex;
+  justify-content: center;
   gap: 1.2rem;
 }
 
@@ -255,8 +296,9 @@
 
 .footer {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .controls {

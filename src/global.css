@@ -4,12 +4,24 @@
   --bg: #faf3e1;
   --text: #222;
   --muted: #999;
+  --town-port-hollow: #059b50;
+  --town-ironkeep: #8a4a10;
+  --town-silkmere: #7b4ad4;
+  --town-goldcrest: #c6a020;
+  --town-dustwatch: #b04040;
+  --current-town: #2480a8;
 }
 
 [data-theme="dark"] {
   --bg: #222;
   --text: #faf3e1;
   --muted: #666;
+  --town-port-hollow: #00d26a;
+  --town-ironkeep: #c47a2c;
+  --town-silkmere: #9b6dff;
+  --town-goldcrest: #d4a844;
+  --town-dustwatch: #c45c5c;
+  --current-town: #6bc5e8;
 }
 
 *,

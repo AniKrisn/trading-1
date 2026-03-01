@@ -12,11 +12,11 @@ const weights = Object.fromEntries(
 ) as Record<GoodId, number>;
 
 const TOWN_COLORS: Record<TownId, string> = {
-  'port-hollow': '#00d26a',
-  'ironkeep': '#c47a2c',
-  'silkmere': '#9b6dff',
-  'goldcrest': '#d4a844',
-  'dustwatch': '#c45c5c',
+  'port-hollow': 'var(--town-port-hollow)',
+  'ironkeep': 'var(--town-ironkeep)',
+  'silkmere': 'var(--town-silkmere)',
+  'goldcrest': 'var(--town-goldcrest)',
+  'dustwatch': 'var(--town-dustwatch)',
 };
 
 const MAP_POS: Record<TownId, { x: number; y: number }> = {
@@ -177,14 +177,17 @@ export function Game() {
           {(Object.keys(MAP_POS) as TownId[]).map(id => {
             const dest = reachable.find(r => r.townId === id);
             const isCurrent = player.currentTownId === id;
+            const isTravelDest = travelState?.toTownId === id;
             const isReachable = !!dest;
             return (
               <span
                 key={id}
                 className={
                   'legend-item' +
+                  (isCurrent ? ' legend-current' : '') +
+                  (isTravelDest ? ' legend-traveling' : '') +
                   (isReachable ? ' legend-reachable' : '') +
-                  (!isCurrent && !isReachable ? ' legend-dim' : '')
+                  (!isCurrent && !isReachable && !isTravelDest ? ' legend-dim' : '')
                 }
                 onClick={isReachable ? () => travelAction(id) : undefined}
               >
@@ -199,6 +202,13 @@ export function Game() {
 
       {currentTown && (
         <div className="market">
+          <div className="market-row market-header">
+            <span />
+            <span>buy</span>
+            <span>sell</span>
+            <span className="held-col">held</span>
+          </div>
+          <div className="market-sep" />
           {marketRows.map(row => (
             <div key={row.goodId} className="market-row">
               <span className="good-name">{row.name}</span>
@@ -207,14 +217,14 @@ export function Game() {
                 onClick={() => handleBuy(row.goodId)}
                 disabled={row.maxBuy === 0}
               >
-                buy {row.buyPrice}
+                {row.buyPrice}
               </button>
               <button
                 className={`trade-btn ${sellClass(row.sellPrice, row.basePrice)}`}
                 onClick={() => handleSell(row.goodId)}
                 disabled={row.held === 0}
               >
-                sell {row.sellPrice}
+                {row.sellPrice}
               </button>
               <span className="held">{row.held > 0 ? `\u00d7${row.held}` : ''}</span>
             </div>
@@ -248,6 +258,7 @@ export function Game() {
       )}
 
       <div className="footer">
+        <span className="status">{statusText || '\u00a0'}</span>
         <div className="controls">
           <button
             className="play-dot"
@@ -259,7 +270,6 @@ export function Game() {
             reset
           </button>
         </div>
-        {statusText && <span className="status">{statusText}</span>}
       </div>
     </main>
   );

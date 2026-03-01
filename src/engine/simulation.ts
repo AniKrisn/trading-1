@@ -28,7 +28,7 @@ export function tickSimulation(state: GameState, basePrices: Record<GoodId, numb
   if (state.player.travelState && !newPlayer.travelState && newPlayer.currentTownId) {
     newLog.push({
       tick: state.tick + 1,
-      message: `Arrived at ${newPlayer.currentTownId}`,
+      message: `Arrived at ${state.towns[newPlayer.currentTownId].name}`,
     });
   }
 
