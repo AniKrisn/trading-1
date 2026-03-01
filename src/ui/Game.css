@@ -23,11 +23,6 @@
   flex-shrink: 0;
 }
 
-.dot-empty {
-  background: transparent !important;
-  box-shadow: inset 0 0 0 1.5px var(--muted);
-}
-
 .muted {
   color: var(--muted);
 }
@@ -71,12 +66,82 @@
   color: var(--muted);
 }
 
-/* ---- Location ---- */
+/* ---- Map ---- */
 
-.location {
+.map {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
+}
+
+.map-svg {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+}
+
+.map-route {
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+
+.map-dot {
+  transition: fill 0.2s;
+}
+
+.map-dot-reachable:hover {
+  fill: #f7e396 !important;
+}
+
+.map-dot-dim {
+  opacity: 0.6;
+}
+
+.map-ring {
+  fill: none;
+  stroke-width: 1.5;
+  animation: ring-pulse 2s ease-in-out infinite;
+}
+
+@keyframes ring-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.map-player {
+  fill: var(--text);
+}
+
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1.2rem;
+  justify-content: center;
+  font-size: 0.8rem;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.legend-reachable {
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.legend-reachable:hover {
+  opacity: 0.5;
+}
+
+.legend-reachable:hover .dot {
+  background-color: #f7e396 !important;
+}
+
+.legend-dim {
+  opacity: 0.6;
 }
 
 /* ---- Market ---- */
@@ -166,42 +231,6 @@
 
 .qty-btn.active {
   color: var(--text);
-}
-
-/* ---- Travel ---- */
-
-.travel {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.town-btn {
-  font-family: inherit;
-  font-size: inherit;
-  background: none;
-  border: none;
-  color: var(--text);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0;
-  text-align: left;
-  transition: opacity 0.15s;
-}
-
-.town-btn:hover {
-  opacity: 0.5;
-}
-
-.town-btn:hover .dot {
-  background-color: #f7e396 !important;
-  transform: scale(1.3);
-}
-
-.town-btn .dot {
-  transition: transform 0.1s, background-color 0.2s;
 }
 
 /* ---- Inventory (while traveling) ---- */
