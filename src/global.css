@@ -1,0 +1,33 @@
+@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap");
+
+:root {
+  --bg: #faf3e1;
+  --text: #222;
+  --muted: #999;
+}
+
+[data-theme="dark"] {
+  --bg: #222;
+  --text: #faf3e1;
+  --muted: #666;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+#root {
+  min-height: 100vh;
+}

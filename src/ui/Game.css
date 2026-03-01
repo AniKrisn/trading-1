@@ -1,0 +1,285 @@
+/* ---- Layout ---- */
+
+.game {
+  font-family: "Geist Mono", monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  max-width: 42ch;
+  margin: 0 auto;
+  padding: 1.5rem;
+  padding-top: 10vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+}
+
+/* ---- Shared ---- */
+
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-empty {
+  background: transparent !important;
+  box-shadow: inset 0 0 0 1.5px var(--muted);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* ---- Theme toggle ---- */
+
+.theme-dot {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.theme-dot:hover {
+  transform: scale(1.3);
+}
+
+.theme-dot:focus {
+  outline: none;
+}
+
+/* ---- Header ---- */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.gold {
+  font-weight: 500;
+}
+
+.cargo {
+  color: var(--muted);
+}
+
+/* ---- Location ---- */
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ---- Market ---- */
+
+.market {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.market-row {
+  display: grid;
+  grid-template-columns: 10ch 9ch 9ch 4ch;
+  gap: 0 0.5ch;
+  align-items: baseline;
+}
+
+.good-name {
+  /* left-aligned by default */
+}
+
+.trade-btn {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  transition: opacity 0.15s;
+}
+
+.trade-btn:hover:not(:disabled) {
+  opacity: 0.4;
+}
+
+.trade-btn:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+.price-good {
+  color: #00d26a;
+}
+
+.price-bad {
+  color: #c45c5c;
+}
+
+[data-theme="dark"] .price-good {
+  color: #3ddc84;
+}
+
+[data-theme="dark"] .price-bad {
+  color: #e57373;
+}
+
+.held {
+  color: var(--muted);
+  text-align: right;
+  font-size: 0.85rem;
+}
+
+/* ---- Quantity ---- */
+
+.qty-row {
+  display: flex;
+  gap: 1.2rem;
+}
+
+.qty-btn {
+  font-family: inherit;
+  font-size: 0.8rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.qty-btn:hover {
+  color: var(--text);
+}
+
+.qty-btn.active {
+  color: var(--text);
+}
+
+/* ---- Travel ---- */
+
+.travel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.town-btn {
+  font-family: inherit;
+  font-size: inherit;
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  text-align: left;
+  transition: opacity 0.15s;
+}
+
+.town-btn:hover {
+  opacity: 0.5;
+}
+
+.town-btn:hover .dot {
+  background-color: #f7e396 !important;
+  transform: scale(1.3);
+}
+
+.town-btn .dot {
+  transition: transform 0.1s, background-color 0.2s;
+}
+
+/* ---- Inventory (while traveling) ---- */
+
+.inventory {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.inv-row {
+  display: flex;
+  gap: 1ch;
+  align-items: baseline;
+}
+
+.inv-qty {
+  color: var(--muted);
+}
+
+/* ---- Footer ---- */
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.play-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s;
+  position: relative;
+}
+
+.play-dot:hover {
+  transform: scale(1.4);
+}
+
+.play-dot::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+.reset-btn {
+  font-family: inherit;
+  font-size: 0.8rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.reset-btn:hover {
+  color: var(--text);
+}
+
+.status {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+  .theme-dot {
+    top: auto;
+    bottom: 24px;
+    right: 24px;
+  }
+}
