@@ -4,28 +4,14 @@ import { useGameLoop } from './useGameLoop';
 import { GOODS, GOOD_IDS } from '@/data/goods';
 import { getBuyPrice, getSellPrice } from '@/engine/market';
 import { getCargoUsed, getCargoFree } from '@/engine/trade';
+import { TOWN_DESCRIPTIONS } from '@/data/descriptions';
+import { WorldMap } from './WorldMap';
 import type { GoodId, TownId } from '@/types';
 import './Game.css';
 
 const weights = Object.fromEntries(
   Object.entries(GOODS).map(([id, g]) => [id, g.weight])
 ) as Record<GoodId, number>;
-
-const TOWN_COLORS: Record<TownId, string> = {
-  'port-hollow': 'var(--town-port-hollow)',
-  'ironkeep': 'var(--town-ironkeep)',
-  'silkmere': 'var(--town-silkmere)',
-  'goldcrest': 'var(--town-goldcrest)',
-  'dustwatch': 'var(--town-dustwatch)',
-};
-
-const MAP_POS: Record<TownId, { x: number; y: number }> = {
-  'dustwatch':   { x: 20,  y: 35  },
-  'silkmere':    { x: 150, y: 15  },
-  'ironkeep':    { x: 237, y: 55  },
-  'port-hollow': { x: 63,  y: 135 },
-  'goldcrest':   { x: 280, y: 155 },
-};
 
 export function Game() {
   useGameLoop();
@@ -131,74 +117,18 @@ export function Game() {
         <span className="cargo">{cargoUsed}/{player.cargoCapacity}</span>
       </div>
 
-      <div className="map">
-        <svg viewBox="0 0 300 170" className="map-svg">
-          {routes.map((r, i) => {
-            const a = MAP_POS[r.from as TownId];
-            const b = MAP_POS[r.to as TownId];
-            return (
-              <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y} className="map-route" />
-            );
-          })}
-          {(Object.keys(MAP_POS) as TownId[]).map(id => {
-            const pos = MAP_POS[id];
-            const isCurrent = player.currentTownId === id;
-            const isReachable = reachable.some(r => r.townId === id);
-            return (
-              <g key={id}>
-                {isCurrent && (
-                  <circle cx={pos.x} cy={pos.y} r={9} className="map-ring" stroke={TOWN_COLORS[id]} />
-                )}
-                <circle
-                  cx={pos.x}
-                  cy={pos.y}
-                  r={5}
-                  fill={TOWN_COLORS[id]}
-                  className={
-                    isReachable ? 'map-dot map-dot-reachable' :
-                    isCurrent ? 'map-dot' : 'map-dot map-dot-dim'
-                  }
-                  onClick={isReachable ? () => travelAction(id) : undefined}
-                  style={isReachable ? { cursor: 'pointer' } : undefined}
-                />
-              </g>
-            );
-          })}
-          {travelState && (() => {
-            const from = MAP_POS[travelState.fromTownId];
-            const to = MAP_POS[travelState.toTownId];
-            const t = travelState.ticksElapsed / travelState.ticksTotal;
-            const cx = from.x + (to.x - from.x) * t;
-            const cy = from.y + (to.y - from.y) * t;
-            return <circle cx={cx} cy={cy} r={4} className="map-player" />;
-          })()}
-        </svg>
-        <div className="map-legend">
-          {(Object.keys(MAP_POS) as TownId[]).map(id => {
-            const dest = reachable.find(r => r.townId === id);
-            const isCurrent = player.currentTownId === id;
-            const isTravelDest = travelState?.toTownId === id;
-            const isReachable = !!dest;
-            return (
-              <span
-                key={id}
-                className={
-                  'legend-item' +
-                  (isCurrent ? ' legend-current' : '') +
-                  (isTravelDest ? ' legend-traveling' : '') +
-                  (isReachable ? ' legend-reachable' : '') +
-                  (!isCurrent && !isReachable && !isTravelDest ? ' legend-dim' : '')
-                }
-                onClick={isReachable ? () => travelAction(id) : undefined}
-              >
-                <span className="dot" style={{ backgroundColor: TOWN_COLORS[id] }} />
-                {towns[id].name}
-                {dest && <span className="muted"> {dest.distance}t</span>}
-              </span>
-            );
-          })}
-        </div>
-      </div>
+      <WorldMap
+        towns={towns}
+        routes={routes}
+        currentTownId={player.currentTownId}
+        travelState={travelState}
+        reachable={reachable}
+        onTravel={travelAction}
+      />
+
+      {currentTown && (
+        <p className="town-desc">{TOWN_DESCRIPTIONS[currentTown.id]}</p>
+      )}
 
       {currentTown && (
         <div className="market">

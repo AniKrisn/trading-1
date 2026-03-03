@@ -4,6 +4,11 @@
   --bg: #faf3e1;
   --text: #222;
   --muted: #999;
+  --chart-land: #f0e4c8;
+  --chart-coast: #8a7a5a;
+  --chart-depth: #b8a880;
+  --chart-route: #999;
+  --chart-compass: #b07850;
   --town-port-hollow: #059b50;
   --town-ironkeep: #8a4a10;
   --town-silkmere: #7b4ad4;
@@ -18,6 +23,11 @@
   --muted: #666;
   --grain-opacity: 0.12;
   --grain-blend: soft-light;
+  --chart-land: #2e2e2a;
+  --chart-coast: #665e4a;
+  --chart-depth: #555040;
+  --chart-route: #555;
+  --chart-compass: #8a6540;
   --town-port-hollow: #00d26a;
   --town-ironkeep: #c47a2c;
   --town-silkmere: #9b6dff;
