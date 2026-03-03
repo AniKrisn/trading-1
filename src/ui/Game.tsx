@@ -1,12 +1,18 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useGameStore } from '@/store/gameStore';
+import { useWorldStore } from '@/store/worldStore';
 import { useGameLoop } from './useGameLoop';
 import { GOODS, GOOD_IDS } from '@/data/goods';
 import { getBuyPrice, getSellPrice } from '@/engine/market';
 import { getCargoUsed, getCargoFree } from '@/engine/trade';
 import { TOWN_DESCRIPTIONS } from '@/data/descriptions';
 import { pickPassage } from '@/data/voyages';
+import { CHARACTER_BY_TOWN } from '@/data/characters';
+import { FOUND_OBJECTS } from '@/data/foundObjects';
+import { saveGame, loadGame, hasSave, deleteSave } from '@/narrative/persistence';
 import { WorldMap } from './WorldMap';
+import { DialoguePanel } from './DialoguePanel';
+import { ApiKeyInput } from './ApiKeyInput';
 import type { GoodId, TownId } from '@/types';
 import './Game.css';
 
@@ -28,7 +34,16 @@ export function Game() {
   const sellAction = useGameStore(s => s.sell);
   const travelAction = useGameStore(s => s.travel);
   const togglePause = useGameStore(s => s.togglePause);
-  const reset = useGameStore(s => s.reset);
+  const gameReset = useGameStore(s => s.reset);
+
+  const dialogue = useWorldStore(s => s.dialogue);
+  const startDialogue = useWorldStore(s => s.startDialogue);
+  const discoveredObjects = useWorldStore(s => s.discoveredObjects);
+  const discoverObject = useWorldStore(s => s.discoverObject);
+  const checkForObject = useWorldStore(s => s.checkForObject);
+  const recordTownVisit = useWorldStore(s => s.recordTownVisit);
+  const worldReset = useWorldStore(s => s.reset);
+  const loadWorldState = useWorldStore(s => s.loadWorldState);
 
   const currentTown = player.currentTownId ? towns[player.currentTownId] : null;
   const travelState = player.travelState;
@@ -108,6 +123,67 @@ export function Game() {
     return '';
   };
 
+  // Record town visits and check for found objects on arrival
+  const prevTownRef = useState<TownId | null>(null);
+  useEffect(() => {
+    if (player.currentTownId && player.currentTownId !== prevTownRef[0]) {
+      recordTownVisit(player.currentTownId, tick);
+      const objectId = checkForObject(tick);
+      if (objectId) {
+        discoverObject(objectId);
+      }
+      prevTownRef[1](player.currentTownId);
+    }
+  }, [player.currentTownId, tick, recordTownVisit, checkForObject, discoverObject, prevTownRef]);
+
+  // Auto-save on arrival at town and dialogue end
+  useEffect(() => {
+    if (player.currentTownId && !dialogue) {
+      const gameState = useGameStore.getState();
+      const worldState = useWorldStore.getState();
+      saveGame(gameState, worldState);
+    }
+  }, [player.currentTownId, dialogue]);
+
+  // Load save on mount
+  useEffect(() => {
+    if (hasSave()) {
+      const save = loadGame();
+      if (save) {
+        // Load game state by resetting and overwriting
+        useGameStore.setState(save.gameState);
+        loadWorldState(save.worldState);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleReset = useCallback(() => {
+    gameReset();
+    worldReset();
+    deleteSave();
+  }, [gameReset, worldReset]);
+
+  const handleTalk = useCallback(() => {
+    if (player.currentTownId) {
+      const charDef = CHARACTER_BY_TOWN[player.currentTownId];
+      if (charDef) {
+        startDialogue(charDef.id, tick);
+      }
+    }
+  }, [player.currentTownId, tick, startDialogue]);
+
+  const npcName = player.currentTownId ? CHARACTER_BY_TOWN[player.currentTownId]?.name : null;
+
+  // Found objects with details
+  const foundObjectDetails = useMemo(() => {
+    return discoveredObjects
+      .map(id => FOUND_OBJECTS.find(o => o.id === id))
+      .filter(Boolean) as typeof FOUND_OBJECTS;
+  }, [discoveredObjects]);
+
+  const [showInventory, setShowInventory] = useState(false);
+
   const statusText = lastLog?.message ?? (isPaused ? 'click prices to trade' : '');
 
   return (
@@ -117,6 +193,24 @@ export function Game() {
       <div className="header">
         <span className="gold">{player.gold}g</span>
         <span className="cargo">{cargoUsed}/{player.cargoCapacity}</span>
+        {foundObjectDetails.length > 0 && (
+          <button
+            className="inv-btn"
+            onClick={() => setShowInventory(!showInventory)}
+          >
+            {showInventory ? 'close' : 'items'}
+          </button>
+        )}
+        {showInventory && (
+          <div className="found-objects">
+            {foundObjectDetails.map(obj => (
+              <div key={obj.id} className="found-object">
+                <span className="found-name">{obj.name}</span>
+                <span className="found-flavor">{obj.flavorText}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <WorldMap
@@ -133,7 +227,17 @@ export function Game() {
         <p className="town-desc">{TOWN_DESCRIPTIONS[currentTown.id]}</p>
       )}
 
-      {currentTown && (
+      {currentTown && !dialogue && npcName && (
+        <button className="talk-btn" onClick={handleTalk}>
+          talk to {npcName}
+        </button>
+      )}
+
+      {dialogue && player.currentTownId && (
+        <DialoguePanel townId={player.currentTownId} />
+      )}
+
+      {currentTown && !dialogue && (
         <div className="market">
           <div className="market-row market-header">
             <span />
@@ -165,7 +269,7 @@ export function Game() {
         </div>
       )}
 
-      {currentTown && (
+      {currentTown && !dialogue && (
         <div className="qty-row">
           {[1, 5, 10, 0].map(q => (
             <button
@@ -194,7 +298,12 @@ export function Game() {
         <span className="status">{statusText || '\u00a0'}</span>
         {travelState && (() => {
           const startTick = tick - travelState.ticksElapsed;
-          return <span className="voyage-text">{pickPassage(startTick).text}</span>;
+          return (
+            <>
+              <span className="voyage-text">{pickPassage(startTick).text}</span>
+              <img src="/boat.png" alt="" className="boat-img" />
+            </>
+          );
         })()}
         <div className="controls">
           <button
@@ -203,10 +312,11 @@ export function Game() {
             style={{ backgroundColor: isPaused ? 'var(--muted)' : '#00d26a' }}
             aria-label={isPaused ? 'Play' : 'Pause'}
           />
-          <button className="reset-btn" onClick={reset}>
+          <button className="reset-btn" onClick={handleReset}>
             reset
           </button>
         </div>
+        <ApiKeyInput />
       </div>
     </main>
   );

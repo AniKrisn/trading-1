@@ -56,6 +56,7 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
+  position: relative;
 }
 
 .gold {
@@ -64,6 +65,21 @@
 
 .cargo {
   color: var(--muted);
+}
+
+.inv-btn {
+  font-family: inherit;
+  font-size: 0.8rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.inv-btn:hover {
+  color: var(--text);
 }
 
 /* ---- Chart (nautical map) ---- */
@@ -89,7 +105,9 @@
 .chart-coast {
   fill: none;
   stroke: var(--chart-coast);
-  stroke-width: 1.2;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
 }
 
 .chart-depth {
@@ -116,8 +134,9 @@
 
 .chart-route {
   stroke: var(--chart-route);
-  stroke-width: 0.8;
-  stroke-dasharray: 4 3;
+  stroke-width: 0.7;
+  stroke-dasharray: 3 4 2 5;
+  stroke-linecap: round;
 }
 
 .chart-dot {
@@ -125,7 +144,7 @@
 }
 
 .chart-dot-reachable:hover {
-  fill: #f7e396 !important;
+  fill: #4a4a5a !important;
 }
 
 .chart-dot-dim {
@@ -188,6 +207,18 @@
   color: var(--muted);
   font-size: 0.75rem;
   font-style: italic;
+}
+
+.boat-img {
+  width: 250px;
+  height: auto;
+  opacity: 0.85;
+  margin: -2rem 0;
+}
+
+[data-theme="dark"] .boat-img {
+  filter: invert(1);
+  opacity: 0.7;
 }
 
 /* ---- Market ---- */
@@ -368,6 +399,193 @@
 .status {
   color: var(--muted);
   font-size: 0.8rem;
+}
+
+/* ---- Talk button ---- */
+
+.talk-btn {
+  font-family: inherit;
+  font-size: 0.8rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  text-align: center;
+  transition: color 0.15s;
+}
+
+.talk-btn:hover {
+  color: var(--text);
+}
+
+/* ---- Dialogue panel ---- */
+
+.dialogue-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-top: 1px solid var(--muted);
+  border-bottom: 1px solid var(--muted);
+  padding: 0.75rem 0;
+  opacity: 0.3;
+}
+
+.dialogue-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5ch;
+}
+
+.dialogue-name {
+  font-weight: 500;
+}
+
+.dialogue-role {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.dialogue-close {
+  font-family: inherit;
+  font-size: 1rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  margin-left: auto;
+  padding: 0;
+  line-height: 1;
+}
+
+.dialogue-close:hover {
+  color: var(--text);
+}
+
+.dialogue-turns {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 12rem;
+  overflow-y: auto;
+}
+
+.dialogue-turn {
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.dialogue-speaker {
+  font-weight: 500;
+}
+
+.dialogue-player {
+  color: var(--muted);
+}
+
+.dialogue-input-row {
+  display: flex;
+  gap: 0.5ch;
+}
+
+.dialogue-field {
+  font-family: inherit;
+  font-size: 0.85rem;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--muted);
+  color: var(--text);
+  outline: none;
+  flex: 1;
+  padding: 0.2rem 0;
+}
+
+.dialogue-field::placeholder {
+  color: var(--muted);
+  opacity: 0.5;
+}
+
+/* ---- Found objects ---- */
+
+.found-objects {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.5rem 0;
+}
+
+.found-object {
+  display: flex;
+  flex-direction: column;
+}
+
+.found-name {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.found-flavor {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-style: italic;
+  opacity: 0.7;
+}
+
+/* ---- API key ---- */
+
+.api-key-status {
+  display: flex;
+  gap: 0.8ch;
+  justify-content: center;
+}
+
+.api-key-btn {
+  font-family: inherit;
+  font-size: 0.7rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.api-key-btn:hover {
+  color: var(--text);
+}
+
+.api-key-clear {
+  opacity: 0.5;
+}
+
+.api-key-input {
+  display: flex;
+  gap: 0.5ch;
+  align-items: baseline;
+  justify-content: center;
+}
+
+.api-key-field {
+  font-family: inherit;
+  font-size: 0.7rem;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--muted);
+  color: var(--text);
+  outline: none;
+  width: 16ch;
+  padding: 0.1rem 0;
+}
+
+.api-key-field::placeholder {
+  color: var(--muted);
+  opacity: 0.5;
 }
 
 @media (max-width: 768px) {

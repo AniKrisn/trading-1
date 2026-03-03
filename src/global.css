@@ -4,17 +4,23 @@
   --bg: #faf3e1;
   --text: #222;
   --muted: #999;
-  --chart-land: #f0e4c8;
-  --chart-coast: #8a7a5a;
-  --chart-depth: #b8a880;
-  --chart-route: #999;
-  --chart-compass: #b07850;
-  --town-port-hollow: #059b50;
-  --town-ironkeep: #8a4a10;
-  --town-silkmere: #7b4ad4;
-  --town-goldcrest: #c6a020;
-  --town-dustwatch: #b04040;
-  --current-town: #2480a8;
+  --chart-land: #e8dcc4;
+  --chart-coast: #1a1a2e;
+  --chart-depth: #8a8070;
+  --chart-route: #3a3a50;
+  --chart-compass: #1a1a2e;
+  --town-port-hollow: #2a5040;
+  --town-ironkeep: #5a3a1a;
+  --town-silkmere: #3a3050;
+  --town-goldcrest: #6a5a20;
+  --town-dustwatch: #5a2a2a;
+  --current-town: #1a3a50;
+  --coast-0: #3a2020;
+  --coast-1: #1a3020;
+  --coast-2: #201a30;
+  --coast-3: #302010;
+  --coast-4: #302a10;
+  --coast-default: #1a1a2e;
 }
 
 [data-theme="dark"] {
@@ -23,17 +29,23 @@
   --muted: #666;
   --grain-opacity: 0.3;
   --grain-blend: soft-light;
-  --chart-land: #2e2e2a;
-  --chart-coast: #665e4a;
-  --chart-depth: #555040;
-  --chart-route: #555;
-  --chart-compass: #8a6540;
-  --town-port-hollow: #00d26a;
-  --town-ironkeep: #c47a2c;
-  --town-silkmere: #9b6dff;
-  --town-goldcrest: #d4a844;
-  --town-dustwatch: #c45c5c;
-  --current-town: #6bc5e8;
+  --chart-land: #2a2a28;
+  --chart-coast: #a0a0b0;
+  --chart-depth: #505048;
+  --chart-route: #707080;
+  --chart-compass: #a0a0b0;
+  --town-port-hollow: #6a9a80;
+  --town-ironkeep: #a08060;
+  --town-silkmere: #8a80a0;
+  --town-goldcrest: #b0a060;
+  --town-dustwatch: #a07070;
+  --current-town: #8ab0c0;
+  --coast-0: #b09090;
+  --coast-1: #80a890;
+  --coast-2: #9090b0;
+  --coast-3: #b0a080;
+  --coast-4: #b0a878;
+  --coast-default: #a0a0b0;
 }
 
 *,

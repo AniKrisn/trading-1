@@ -104,6 +104,31 @@ const BASE_ISLANDS = [
   ...ISLETS,
 ];
 
+// Subtle ink tints per island — dark base with a hint of color
+const COAST_TINTS = [
+  '#3a2020', // Dustwatch — warm rust ink
+  '#1a3020', // Port Hollow — forest ink
+  '#201a30', // Silkmere — indigo ink
+  '#302010', // Ironkeep — burnt sienna ink
+  '#302a10', // Goldcrest — raw umber ink
+  '#1a1a2e', // islet
+  '#1a1a2e', // islet
+  '#1a1a2e', // islet
+  '#1a1a2e', // islet
+];
+
+const COAST_TINTS_DARK = [
+  '#b09090', // Dustwatch
+  '#80a890', // Port Hollow
+  '#9090b0', // Silkmere
+  '#b0a080', // Ironkeep
+  '#b0a878', // Goldcrest
+  '#a0a0b0', // islet
+  '#a0a0b0', // islet
+  '#a0a0b0', // islet
+  '#a0a0b0', // islet
+];
+
 // Base depth soundings
 const DEPTHS = [
   { x: 18,  y: 108, v: 7 },
@@ -156,13 +181,28 @@ export function WorldMap({
   return (
     <div className="chart">
       <svg viewBox="0 0 400 236" className="chart-svg">
+        <defs>
+          {/* Coastline roughness */}
+          <filter id="ink-rough" x="-4%" y="-4%" width="108%" height="108%">
+            <feTurbulence type="turbulence" baseFrequency="0.03" numOctaves="5" seed={7} result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3.5" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+          {/* Route roughness — higher frequency, heavier displacement */}
+          <filter id="ink-rough-route" x="-8%" y="-8%" width="116%" height="116%">
+            <feTurbulence type="turbulence" baseFrequency="0.06" numOctaves="3" seed={13} result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </defs>
+
         {/* Islands — fill + stroke */}
         {allIslands.map((d, i) => (
           <path key={`land-${i}`} className="chart-land" d={d} />
         ))}
-        {allIslands.map((d, i) => (
-          <path key={`coast-${i}`} className="chart-coast" d={d} />
-        ))}
+        <g filter="url(#ink-rough)">
+          {allIslands.map((d, i) => (
+            <path key={`coast-${i}`} className="chart-coast" d={d} />
+          ))}
+        </g>
 
         {/* Depth soundings (drifting) */}
         {DEPTHS.map((d, i) => (
@@ -180,18 +220,20 @@ export function WorldMap({
         </g>
 
         {/* Trade routes (dashed) */}
-        {routes.map((r, i) => {
-          const a = CHART_POS[r.from as TownId];
-          const b = CHART_POS[r.to as TownId];
-          return (
-            <line
-              key={i}
-              x1={a.x} y1={a.y}
-              x2={b.x} y2={b.y}
-              className="chart-route"
-            />
-          );
-        })}
+        <g filter="url(#ink-rough-route)">
+          {routes.map((r, i) => {
+            const a = CHART_POS[r.from as TownId];
+            const b = CHART_POS[r.to as TownId];
+            return (
+              <line
+                key={i}
+                x1={a.x} y1={a.y}
+                x2={b.x} y2={b.y}
+                className="chart-route"
+              />
+            );
+          })}
+        </g>
 
         {/* Town markers + labels */}
         {TOWN_IDS.map(id => {
@@ -223,7 +265,7 @@ export function WorldMap({
               <text
                 x={pos.x + label.dx}
                 y={pos.y + label.dy}
-                textAnchor={label.anchor}
+                textAnchor={label.anchor as 'start' | 'middle' | 'end'}
                 className={
                   'chart-label' +
                   (isCurrent ? ' chart-label-current' : '') +

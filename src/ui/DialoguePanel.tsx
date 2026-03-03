@@ -1,0 +1,99 @@
+import { useState, useRef, useEffect } from 'react';
+import { useWorldStore } from '@/store/worldStore';
+import { processDialogue } from '@/narrative/dialogue';
+import { createAnthropicClient, createMockClient, getStoredApiKey } from '@/narrative/llmClient';
+import { CHARACTER_BY_TOWN } from '@/data/characters';
+import { CONSTITUTION } from '@/data/constitution';
+import type { TownId } from '@/types';
+
+function getLLMClient() {
+  const key = getStoredApiKey();
+  return key ? createAnthropicClient(key) : createMockClient();
+}
+
+export function DialoguePanel({ townId }: { townId: TownId }) {
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const dialogue = useWorldStore(s => s.dialogue);
+  const addDialogueTurn = useWorldStore(s => s.addDialogueTurn);
+  const endDialogue = useWorldStore(s => s.endDialogue);
+  const addPlayerMemory = useWorldStore(s => s.addPlayerMemory);
+  const updateCharacter = useWorldStore(s => s.updateCharacter);
+
+  const characterDef = CHARACTER_BY_TOWN[townId];
+  if (!characterDef || !dialogue) return null;
+
+  const handleSend = async () => {
+    const message = input.trim();
+    if (!message || loading) return;
+
+    setInput('');
+    addDialogueTurn({ role: 'player', content: message });
+    setLoading(true);
+
+    try {
+      const client = getLLMClient();
+      // Get fresh world state after adding player turn
+      const freshState = useWorldStore.getState();
+      const result = await processDialogue(freshState, characterDef, message, client, CONSTITUTION);
+
+      addDialogueTurn({ role: 'npc', content: result.npcReply });
+
+      if (result.memoryEntry) {
+        addPlayerMemory(result.memoryEntry);
+        updateCharacter(characterDef.id, { memory: `Player discussed: ${message.slice(0, 40)}` });
+      }
+    } catch (err) {
+      addDialogueTurn({ role: 'npc', content: '...' });
+      console.error('Dialogue error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [dialogue.turns]);
+
+  return (
+    <div className="dialogue-panel">
+      <div className="dialogue-header">
+        <span className="dialogue-name">{characterDef.name}</span>
+        <span className="dialogue-role">{characterDef.role}</span>
+        <button className="dialogue-close" onClick={endDialogue}>&times;</button>
+      </div>
+      <div className="dialogue-turns" ref={scrollRef}>
+        {dialogue.turns.map((turn, i) => (
+          <div key={i} className={`dialogue-turn dialogue-${turn.role}`}>
+            <span className="dialogue-speaker">
+              {turn.role === 'npc' ? characterDef.name : 'You'}:
+            </span>{' '}
+            {turn.content}
+          </div>
+        ))}
+        {loading && (
+          <div className="dialogue-turn dialogue-npc">
+            <span className="dialogue-speaker">{characterDef.name}:</span> ...
+          </div>
+        )}
+      </div>
+      <div className="dialogue-input-row">
+        <input
+          type="text"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') handleSend(); }}
+          placeholder="Say something..."
+          className="dialogue-field"
+          disabled={loading}
+          autoFocus
+        />
+      </div>
+    </div>
+  );
+}
