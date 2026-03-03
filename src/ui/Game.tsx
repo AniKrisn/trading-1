@@ -5,6 +5,7 @@ import { GOODS, GOOD_IDS } from '@/data/goods';
 import { getBuyPrice, getSellPrice } from '@/engine/market';
 import { getCargoUsed, getCargoFree } from '@/engine/trade';
 import { TOWN_DESCRIPTIONS } from '@/data/descriptions';
+import { pickPassage } from '@/data/voyages';
 import { WorldMap } from './WorldMap';
 import type { GoodId, TownId } from '@/types';
 import './Game.css';
@@ -17,6 +18,7 @@ export function Game() {
   useGameLoop();
   const [tradeQty, setTradeQty] = useState<number>(1);
 
+  const tick = useGameStore(s => s.tick);
   const player = useGameStore(s => s.player);
   const towns = useGameStore(s => s.towns);
   const routes = useGameStore(s => s.routes);
@@ -124,6 +126,7 @@ export function Game() {
         travelState={travelState}
         reachable={reachable}
         onTravel={travelAction}
+        tick={tick}
       />
 
       {currentTown && (
@@ -189,6 +192,10 @@ export function Game() {
 
       <div className="footer">
         <span className="status">{statusText || '\u00a0'}</span>
+        {travelState && (() => {
+          const startTick = tick - travelState.ticksElapsed;
+          return <span className="voyage-text">{pickPassage(startTick).text}</span>;
+        })()}
         <div className="controls">
           <button
             className="play-dot"

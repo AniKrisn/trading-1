@@ -7,6 +7,7 @@ interface WorldMapProps {
   travelState: TravelState | null;
   reachable: { townId: TownId; distance: number }[];
   onTravel: (townId: TownId) => void;
+  tick: number;
 }
 
 const TOWN_COLORS: Record<TownId, string> = {
@@ -35,7 +36,6 @@ const LABEL_OFFSET: Record<TownId, { dx: number; dy: number; anchor: string }> =
 
 // --- Archipelago islands ---
 
-// Dustwatch — small, remote island (upper-left)
 const ISLAND_DUSTWATCH =
   'M 44 72' +
   ' C 48 60, 62 56, 76 60' +
@@ -45,7 +45,6 @@ const ISLAND_DUSTWATCH =
   ' C 46 96, 36 86, 36 78' +
   ' C 36 74, 40 72, 44 72 Z';
 
-// Port Hollow — mid-sized coastal island with harbor bay (center-left)
 const ISLAND_PORT_HOLLOW =
   'M 80 178' +
   ' C 86 168, 96 160, 110 158' +
@@ -53,11 +52,9 @@ const ISLAND_PORT_HOLLOW =
   ' C 150 176, 152 186, 148 196' +
   ' C 144 204, 136 210, 126 214' +
   ' C 116 218, 104 216, 94 210' +
-  // Harbor indent on the west side
   ' C 88 206, 82 200, 80 196' +
   ' C 76 192, 74 186, 80 178 Z';
 
-// Silkmere — elongated island with ruins feel (center-top)
 const ISLAND_SILKMERE =
   'M 172 58' +
   ' C 178 46, 192 40, 208 42' +
@@ -67,20 +64,17 @@ const ISLAND_SILKMERE =
   ' C 190 80, 180 72, 174 66' +
   ' C 170 62, 170 60, 172 58 Z';
 
-// Ironkeep — rugged island with fjord indent (right)
 const ISLAND_IRONKEEP =
   'M 274 82' +
   ' C 280 72, 294 66, 308 68' +
   ' C 320 70, 330 76, 334 86' +
   ' C 338 96, 336 108, 328 116' +
   ' C 320 124, 308 128, 296 126' +
-  // Fjord indent on the south side
   ' C 290 124, 296 116, 300 108' +
   ' C 302 102, 298 98, 292 100' +
   ' C 286 102, 280 106, 276 110' +
   ' C 270 106, 268 96, 274 82 Z';
 
-// Goldcrest — sheltered island with bay (lower-right)
 const ISLAND_GOLDCREST =
   'M 332 182' +
   ' C 338 172, 350 166, 364 168' +
@@ -90,7 +84,6 @@ const ISLAND_GOLDCREST =
   ' C 340 218, 334 210, 332 200' +
   ' C 330 194, 330 188, 332 182 Z';
 
-// Small rocky islets for atmosphere
 const ISLETS = [
   'M 30 128 C 34 124, 40 124, 42 128 C 44 132, 38 136, 32 134 C 28 132, 28 130, 30 128 Z',
   'M 148 130 C 152 126, 158 126, 160 130 C 162 134, 156 138, 150 136 C 146 134, 146 132, 148 130 Z',
@@ -98,7 +91,11 @@ const ISLETS = [
   'M 118 108 C 120 104, 126 104, 128 108 C 130 112, 126 114, 120 112 C 116 110, 116 108, 118 108 Z',
 ];
 
-const ALL_ISLANDS = [
+// Phantom islet — appears and disappears
+const PHANTOM_ISLET =
+  'M 188 158 C 192 154, 198 154, 200 158 C 202 162, 196 166, 190 164 C 186 162, 186 160, 188 158 Z';
+
+const BASE_ISLANDS = [
   ISLAND_DUSTWATCH,
   ISLAND_PORT_HOLLOW,
   ISLAND_SILKMERE,
@@ -107,32 +104,39 @@ const ALL_ISLANDS = [
   ...ISLETS,
 ];
 
-// Depth soundings — clustered along channels, denser near shores
+// Base depth soundings
 const DEPTHS = [
-  // Cluster near Dustwatch approach
   { x: 18,  y: 108, v: 7 },
   { x: 28,  y: 120, v: 9 },
   { x: 12,  y: 130, v: 11 },
-  // Channel: Dustwatch — Silkmere
   { x: 108, y: 42,  v: 14 },
   { x: 122, y: 48,  v: 16 },
   { x: 138, y: 44,  v: 18 },
-  // Near Port Hollow harbor
   { x: 58,  y: 178, v: 4 },
   { x: 64,  y: 168, v: 6 },
   { x: 54,  y: 156, v: 5 },
-  // Channel: Port Hollow — Silkmere
   { x: 152, y: 118, v: 12 },
   { x: 160, y: 126, v: 14 },
   { x: 168, y: 112, v: 15 },
-  // Near Ironkeep
   { x: 252, y: 72,  v: 8 },
   { x: 248, y: 84,  v: 10 },
-  // Channel: Ironkeep — Goldcrest
   { x: 332, y: 130, v: 11 },
   { x: 340, y: 140, v: 9 },
   { x: 348, y: 148, v: 7 },
 ];
+
+// Deterministic hash for drift
+function hash(a: number, b: number): number {
+  return ((a * 2654435761 + b * 1597334677) >>> 0) % 1000;
+}
+
+// Drift a depth value by -2..+2 based on tick, changes every ~20 ticks
+function driftDepth(base: number, index: number, tick: number): number {
+  const epoch = Math.floor(tick / 20);
+  const h = hash(epoch, index);
+  const offset = (h % 5) - 2; // -2 to +2
+  return Math.max(1, base + offset);
+}
 
 const TOWN_IDS = Object.keys(CHART_POS) as TownId[];
 
@@ -143,22 +147,27 @@ export function WorldMap({
   travelState,
   reachable,
   onTravel,
+  tick,
 }: WorldMapProps) {
+  // Phantom islet appears roughly 15% of the time
+  const showPhantom = hash(Math.floor(tick / 30), 42) < 150;
+  const allIslands = showPhantom ? [...BASE_ISLANDS, PHANTOM_ISLET] : BASE_ISLANDS;
+
   return (
     <div className="chart">
       <svg viewBox="0 0 400 236" className="chart-svg">
         {/* Islands — fill + stroke */}
-        {ALL_ISLANDS.map((d, i) => (
+        {allIslands.map((d, i) => (
           <path key={`land-${i}`} className="chart-land" d={d} />
         ))}
-        {ALL_ISLANDS.map((d, i) => (
+        {allIslands.map((d, i) => (
           <path key={`coast-${i}`} className="chart-coast" d={d} />
         ))}
 
-        {/* Depth soundings */}
+        {/* Depth soundings (drifting) */}
         {DEPTHS.map((d, i) => (
           <text key={i} className="chart-depth" x={d.x} y={d.y}>
-            {d.v}
+            {driftDepth(d.v, i, tick)}
           </text>
         ))}
 

@@ -182,6 +182,14 @@
   line-height: 1.5;
 }
 
+/* ---- Voyage text ---- */
+
+.voyage-text {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
 /* ---- Market ---- */
 
 .market {
