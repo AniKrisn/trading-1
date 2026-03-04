@@ -56,13 +56,13 @@ export const TOWNS_CONFIG: TownConfig[] = [
 /* ------------------------------------------------------------------ */
 
 export const ROUTES: Route[] = [
-  { from: 'port-hollow', to: 'dustwatch',  distance: 4 },
-  { from: 'port-hollow', to: 'silkmere',   distance: 5 },
-  { from: 'dustwatch',   to: 'ironkeep',   distance: 6 },
-  { from: 'dustwatch',   to: 'silkmere',   distance: 5 },
-  { from: 'silkmere',    to: 'ironkeep',   distance: 4 },
-  { from: 'ironkeep',    to: 'goldcrest',  distance: 5 },
-  { from: 'silkmere',    to: 'goldcrest',  distance: 6 },
+  { from: 'port-hollow', to: 'dustwatch',  distance: 8  },
+  { from: 'port-hollow', to: 'silkmere',   distance: 10 },
+  { from: 'dustwatch',   to: 'ironkeep',   distance: 12 },
+  { from: 'dustwatch',   to: 'silkmere',   distance: 10 },
+  { from: 'silkmere',    to: 'ironkeep',   distance: 8  },
+  { from: 'ironkeep',    to: 'goldcrest',  distance: 10 },
+  { from: 'silkmere',    to: 'goldcrest',  distance: 12 },
 ];
 
 /* ------------------------------------------------------------------ */

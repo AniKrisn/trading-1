@@ -63,8 +63,10 @@ export function DialoguePanel({ townId }: { townId: TownId }) {
   return (
     <div className="dialogue-panel">
       <div className="dialogue-header">
-        <span className="dialogue-name">{characterDef.name}</span>
-        <span className="dialogue-role">{characterDef.role}</span>
+        <div className="dialogue-header-left">
+          <span className="dialogue-name">{characterDef.name}</span>
+          <span className="dialogue-role">{characterDef.role}</span>
+        </div>
         <button className="dialogue-close" onClick={endDialogue}>&times;</button>
       </div>
       <div className="dialogue-turns" ref={scrollRef}>

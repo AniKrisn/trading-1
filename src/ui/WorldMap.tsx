@@ -27,11 +27,11 @@ const CHART_POS: Record<TownId, { x: number; y: number }> = {
 };
 
 const LABEL_OFFSET: Record<TownId, { dx: number; dy: number; anchor: string }> = {
-  'dustwatch':    { dx: 0,   dy: -12, anchor: 'middle' },
-  'port-hollow':  { dx: -12, dy: 4,   anchor: 'end' },
-  'silkmere':     { dx: 0,   dy: -12, anchor: 'middle' },
-  'ironkeep':     { dx: 0,   dy: -12, anchor: 'middle' },
-  'goldcrest':    { dx: -12, dy: 4,   anchor: 'end' },
+  'dustwatch':    { dx: 0,   dy: -20, anchor: 'middle' },
+  'port-hollow':  { dx: 3,   dy: 14,  anchor: 'end' },
+  'silkmere':     { dx: 0,   dy: -26, anchor: 'middle' },
+  'ironkeep':     { dx: 0,   dy: -8,  anchor: 'middle' },
+  'goldcrest':    { dx: 0,   dy: 16,  anchor: 'middle' },
 };
 
 // --- Archipelago islands ---
@@ -76,13 +76,16 @@ const ISLAND_IRONKEEP =
   ' C 270 106, 268 96, 274 82 Z';
 
 const ISLAND_GOLDCREST =
-  'M 332 182' +
-  ' C 338 172, 350 166, 364 168' +
-  ' C 376 170, 386 178, 388 190' +
-  ' C 390 200, 386 210, 378 218' +
-  ' C 370 224, 358 226, 348 222' +
-  ' C 340 218, 334 210, 332 200' +
-  ' C 330 194, 330 188, 332 182 Z';
+  'M 326 182' +
+  ' C 332 172, 346 168, 364 170' +
+  ' C 380 172, 392 178, 394 188' +
+  ' C 396 198, 392 208, 382 214' +
+  ' C 372 220, 358 222, 346 218' +
+  ' C 336 214, 328 208, 326 200' +
+  ' C 324 194, 324 188, 326 182 Z';
+
+const ISLET_GOLDCREST_SOUTH =
+  'M 314 228 C 318 222, 326 222, 328 228 C 330 234, 324 240, 316 238 C 310 236, 310 232, 314 228 Z';
 
 const ISLETS = [
   'M 30 128 C 34 124, 40 124, 42 128 C 44 132, 38 136, 32 134 C 28 132, 28 130, 30 128 Z',
@@ -101,6 +104,7 @@ const BASE_ISLANDS = [
   ISLAND_SILKMERE,
   ISLAND_IRONKEEP,
   ISLAND_GOLDCREST,
+  ISLET_GOLDCREST_SOUTH,
   ...ISLETS,
 ];
 
@@ -153,7 +157,8 @@ export function WorldMap({
   reachable,
   onTravel,
   tick,
-}: WorldMapProps) {
+  children,
+}: WorldMapProps & { children?: React.ReactNode }) {
   // Phantom islet appears roughly 15% of the time
   const showPhantom = hash(Math.floor(tick / 30), 42) < 150;
   const allIslands = showPhantom ? [...BASE_ISLANDS, PHANTOM_ISLET] : BASE_ISLANDS;
@@ -228,7 +233,7 @@ export function WorldMap({
         ))}
 
         {/* Compass rose */}
-        <g className="chart-compass" transform="translate(380, 210)">
+        <g className="chart-compass" transform="translate(405, 235)">
           <line x1="0" y1="-10" x2="0" y2="10" />
           <line x1="-10" y1="0" x2="10" y2="0" />
           <circle r="1.5" />
@@ -292,7 +297,6 @@ export function WorldMap({
                 }
               >
                 {towns[id].name}
-                {dest && <tspan className="chart-label-dist"> {dest.distance}t</tspan>}
               </text>
             </g>
           );
@@ -312,6 +316,7 @@ export function WorldMap({
           );
         })()}
       </svg>
+      {children}
     </div>
   );
 }

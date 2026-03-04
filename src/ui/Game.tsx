@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { useWorldStore } from '@/store/worldStore';
 import { useGameLoop } from './useGameLoop';
@@ -178,8 +178,6 @@ export function Game() {
 
   return (
     <main className="game">
-      <ThemeToggle />
-
       <div className="header">
         <span className="gold">{player.gold}g</span>
         <span className="cargo">{cargoUsed}/{player.cargoCapacity}</span>
@@ -188,7 +186,7 @@ export function Game() {
             className="inv-btn"
             onClick={() => setShowInventory(!showInventory)}
           >
-            {showInventory ? 'close' : 'items'}
+            {showInventory ? 'Close' : 'Items'}
           </button>
         )}
       </div>
@@ -203,7 +201,9 @@ export function Game() {
             reachable={reachable}
             onTravel={travelAction}
             tick={tick}
-          />
+          >
+            <ThemeToggle ticksElapsed={travelState ? travelState.ticksElapsed : null} />
+          </WorldMap>
         </div>
         <div className={`found-objects ${showInventory ? 'found-open' : 'found-closed'}`}>
           <svg className="found-border" viewBox="0 0 400 200" preserveAspectRatio="none">
@@ -317,30 +317,94 @@ export function Game() {
 const THEMES = ['dawn', 'day', 'dusk', 'dark'] as const;
 type Theme = typeof THEMES[number];
 
-function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>(() => {
+const TICKS_PER_THEME = 4;
+
+function ThemeToggle({ ticksElapsed }: { ticksElapsed: number | null }) {
+  const [baseIndex, setBaseIndex] = useState(() => {
     const saved = localStorage.getItem('theme') as Theme | null;
-    if (saved && THEMES.includes(saved)) return saved;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'dawn';
+    if (saved && (THEMES as readonly string[]).includes(saved)) return THEMES.indexOf(saved as Theme);
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 3 : 0;
   });
+
+  // Track the last travel theme so we keep it when travel ends
+  const lastTravelIndex = useRef(baseIndex % THEMES.length);
+  const wasTravel = useRef(false);
+
+  let themeIndex: number;
+  if (ticksElapsed !== null) {
+    themeIndex = (baseIndex + Math.floor(ticksElapsed / TICKS_PER_THEME)) % THEMES.length;
+    lastTravelIndex.current = themeIndex;
+    wasTravel.current = true;
+  } else {
+    if (wasTravel.current) {
+      setBaseIndex(lastTravelIndex.current);
+      wasTravel.current = false;
+    }
+    themeIndex = baseIndex % THEMES.length;
+  }
+
+  const theme = THEMES[themeIndex];
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+    if (ticksElapsed === null) localStorage.setItem('theme', theme);
+  }, [theme, ticksElapsed]);
 
-  const next = () => {
-    setTheme(t => THEMES[(THEMES.indexOf(t) + 1) % THEMES.length]);
-  };
+  const R = 14;
+  const handLen = R - 4;
 
   return (
-    <div className="theme-dots" onClick={next}>
-      {THEMES.map(t => (
-        <span
-          key={t}
-          className={`theme-dot${t === theme ? ' theme-dot-active' : ''}`}
-        />
-      ))}
-    </div>
+    <svg className="theme-clock" viewBox="-26 -26 52 52" onClick={() => setBaseIndex(i => i + 1)}>
+      <defs>
+        <filter id="ink-clock" x="-8%" y="-8%" width="116%" height="116%">
+          <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="4" seed={11} result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+      <g filter="url(#ink-clock)">
+        <circle r={R} className="clock-face" />
+        {/* Inner decorative ring */}
+        <circle r={R - 5} className="clock-ring" />
+        {/* Decorative pips at cardinal points */}
+        {[0, 90, 180, 270].map(angle => {
+          const rad = (angle - 90) * Math.PI / 180;
+          return <circle key={`pip-${angle}`} cx={Math.cos(rad) * (R - 5)} cy={Math.sin(rad) * (R - 5)} r="0.6" className="clock-pip" />;
+        })}
+        {/* Minor hour ticks (in-between) */}
+        {[30, 60, 120, 150, 210, 240, 300, 330].map(angle => {
+          const rad = (angle - 90) * Math.PI / 180;
+          return (
+            <line
+              key={angle}
+              x1={Math.cos(rad) * (R - 2)}
+              y1={Math.sin(rad) * (R - 2)}
+              x2={Math.cos(rad) * R}
+              y2={Math.sin(rad) * R}
+              className="clock-minor"
+            />
+          );
+        })}
+        {/* Major ticks at 12, 3, 6, 9 */}
+        {[0, 90, 180, 270].map(angle => {
+          const rad = (angle - 90) * Math.PI / 180;
+          return (
+            <line
+              key={angle}
+              x1={Math.cos(rad) * (R - 3.5)}
+              y1={Math.sin(rad) * (R - 3.5)}
+              x2={Math.cos(rad) * R}
+              y2={Math.sin(rad) * R}
+              className="clock-tick"
+            />
+          );
+        })}
+        {/* Hand */}
+        {(() => {
+          const rad = ((themeIndex % 4) * 90 - 90) * Math.PI / 180;
+          return <line x1="0" y1="0" x2={Math.cos(rad) * handLen} y2={Math.sin(rad) * handLen} className="clock-hand" />;
+        })()}
+        <circle r="1.5" className="clock-center" />
+      </g>
+    </svg>
   );
 }

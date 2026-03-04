@@ -1,5 +1,27 @@
 @import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap");
 
+@property --bg { syntax: '<color>'; inherits: true; initial-value: #faf3e1; }
+@property --text { syntax: '<color>'; inherits: true; initial-value: #222; }
+@property --muted { syntax: '<color>'; inherits: true; initial-value: #999; }
+@property --chart-land { syntax: '<color>'; inherits: true; initial-value: #e8dcc4; }
+@property --chart-coast { syntax: '<color>'; inherits: true; initial-value: #1a1a2e; }
+@property --chart-depth { syntax: '<color>'; inherits: true; initial-value: #8a8070; }
+@property --chart-route { syntax: '<color>'; inherits: true; initial-value: #3a3a50; }
+@property --chart-compass { syntax: '<color>'; inherits: true; initial-value: #1a1a2e; }
+@property --town-port-hollow { syntax: '<color>'; inherits: true; initial-value: #2a5040; }
+@property --town-ironkeep { syntax: '<color>'; inherits: true; initial-value: #5a3a1a; }
+@property --town-silkmere { syntax: '<color>'; inherits: true; initial-value: #3a3050; }
+@property --town-goldcrest { syntax: '<color>'; inherits: true; initial-value: #6a5a20; }
+@property --town-dustwatch { syntax: '<color>'; inherits: true; initial-value: #5a2a2a; }
+@property --current-town { syntax: '<color>'; inherits: true; initial-value: #1a3a50; }
+@property --coast-0 { syntax: '<color>'; inherits: true; initial-value: #3a2020; }
+@property --coast-1 { syntax: '<color>'; inherits: true; initial-value: #1a3020; }
+@property --coast-2 { syntax: '<color>'; inherits: true; initial-value: #201a30; }
+@property --coast-3 { syntax: '<color>'; inherits: true; initial-value: #302010; }
+@property --coast-4 { syntax: '<color>'; inherits: true; initial-value: #302a10; }
+@property --coast-default { syntax: '<color>'; inherits: true; initial-value: #1a1a2e; }
+@property --grain-opacity { syntax: '<number>'; inherits: true; initial-value: 0.55; }
+
 :root {
   --bg: #faf3e1;
   --text: #222;
@@ -21,6 +43,15 @@
   --coast-3: #302010;
   --coast-4: #302a10;
   --coast-default: #1a1a2e;
+  transition:
+    --bg 0.8s, --text 0.8s, --muted 0.8s,
+    --chart-land 0.8s, --chart-coast 0.8s, --chart-depth 0.8s,
+    --chart-route 0.8s, --chart-compass 0.8s,
+    --town-port-hollow 0.8s, --town-ironkeep 0.8s, --town-silkmere 0.8s,
+    --town-goldcrest 0.8s, --town-dustwatch 0.8s, --current-town 0.8s,
+    --coast-0 0.8s, --coast-1 0.8s, --coast-2 0.8s,
+    --coast-3 0.8s, --coast-4 0.8s, --coast-default 0.8s,
+    --grain-opacity 0.8s;
 }
 
 [data-theme="day"] {
@@ -54,22 +85,22 @@
   --grain-opacity: 0.25;
   --grain-blend: soft-light;
   --chart-land: #423c38;
-  --chart-coast: #908070;
+  --chart-coast: #584838;
   --chart-depth: #606050;
-  --chart-route: #707060;
-  --chart-compass: #908070;
+  --chart-route: #504838;
+  --chart-compass: #584838;
   --town-port-hollow: #488058;
   --town-ironkeep: #888050;
   --town-silkmere: #706860;
   --town-goldcrest: #989038;
   --town-dustwatch: #886048;
   --current-town: #a09060;
-  --coast-0: #886050;
-  --coast-1: #488850;
-  --coast-2: #606860;
-  --coast-3: #888848;
-  --coast-4: #889040;
-  --coast-default: #908070;
+  --coast-0: #604838;
+  --coast-1: #385838;
+  --coast-2: #484048;
+  --coast-3: #584828;
+  --coast-4: #585028;
+  --coast-default: #584838;
 }
 
 [data-theme="dark"] {
