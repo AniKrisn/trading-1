@@ -54,6 +54,30 @@
     --grain-opacity 0.8s;
 }
 
+[data-theme="dawn"] {
+  --bg: #faf3e1;
+  --text: #222;
+  --muted: #999;
+  --grain-opacity: 0.55;
+  --chart-land: #e8dcc4;
+  --chart-coast: #1a1a2e;
+  --chart-depth: #8a8070;
+  --chart-route: #3a3a50;
+  --chart-compass: #1a1a2e;
+  --town-port-hollow: #2a5040;
+  --town-ironkeep: #5a3a1a;
+  --town-silkmere: #3a3050;
+  --town-goldcrest: #6a5a20;
+  --town-dustwatch: #5a2a2a;
+  --current-town: #1a3a50;
+  --coast-0: #3a2020;
+  --coast-1: #1a3020;
+  --coast-2: #201a30;
+  --coast-3: #302010;
+  --coast-4: #302a10;
+  --coast-default: #1a1a2e;
+}
+
 [data-theme="day"] {
   --bg: #f0ddc4;
   --text: #2a1a0a;
@@ -84,7 +108,7 @@
   --muted: #706860;
   --grain-opacity: 0.25;
 
-  --chart-land: #423c38;
+  --chart-land: #302a28;
   --chart-coast: #584838;
   --chart-depth: #606050;
   --chart-route: #504838;
@@ -109,7 +133,7 @@
   --muted: #484848;
   --grain-opacity: 0.2;
 
-  --chart-land: #1e2228;
+  --chart-land: #121820;
   --chart-coast: #707880;
   --chart-depth: #383e48;
   --chart-route: #505860;

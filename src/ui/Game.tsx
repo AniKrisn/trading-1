@@ -9,10 +9,10 @@ import { TOWN_DESCRIPTIONS } from '@/data/descriptions';
 import { pickPassage } from '@/data/voyages';
 import { CHARACTER_BY_TOWN } from '@/data/characters';
 import { FOUND_OBJECTS } from '@/data/foundObjects';
-import { saveGame, loadGame, hasSave, deleteSave } from '@/narrative/persistence';
+import { saveGame, loadGame, hasSave } from '@/narrative/persistence';
 import { WorldMap } from './WorldMap';
 import { DialoguePanel } from './DialoguePanel';
-import { ApiKeyInput } from './ApiKeyInput';
+
 import type { GoodId, TownId } from '@/types';
 import './Game.css';
 
@@ -27,21 +27,20 @@ export function Game() {
   const player = useGameStore(s => s.player);
   const towns = useGameStore(s => s.towns);
   const routes = useGameStore(s => s.routes);
-  const isPaused = useGameStore(s => s.isPaused);
   const log = useGameStore(s => s.log);
   const buyAction = useGameStore(s => s.buy);
   const sellAction = useGameStore(s => s.sell);
   const travelAction = useGameStore(s => s.travel);
-  const togglePause = useGameStore(s => s.togglePause);
-  const gameReset = useGameStore(s => s.reset);
+
 
   const dialogue = useWorldStore(s => s.dialogue);
   const startDialogue = useWorldStore(s => s.startDialogue);
+  const endDialogue = useWorldStore(s => s.endDialogue);
   const discoveredObjects = useWorldStore(s => s.discoveredObjects);
   const discoverObject = useWorldStore(s => s.discoverObject);
   const checkForObject = useWorldStore(s => s.checkForObject);
   const recordTownVisit = useWorldStore(s => s.recordTownVisit);
-  const worldReset = useWorldStore(s => s.reset);
+
   const loadWorldState = useWorldStore(s => s.loadWorldState);
 
   const currentTown = player.currentTownId ? towns[player.currentTownId] : null;
@@ -126,6 +125,13 @@ export function Game() {
     }
   }, [player.currentTownId, tick, recordTownVisit, checkForObject, discoverObject, prevTownRef]);
 
+  // Clear dialogue when leaving town
+  useEffect(() => {
+    if (!player.currentTownId && dialogue) {
+      endDialogue();
+    }
+  }, [player.currentTownId, dialogue, endDialogue]);
+
   // Auto-save on arrival at town and dialogue end
   useEffect(() => {
     if (player.currentTownId && !dialogue) {
@@ -147,12 +153,6 @@ export function Game() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const handleReset = useCallback(() => {
-    gameReset();
-    worldReset();
-    deleteSave();
-  }, [gameReset, worldReset]);
 
   const handleTalk = useCallback(() => {
     if (player.currentTownId) {
@@ -217,6 +217,7 @@ export function Game() {
               <rect x="2" y="2" width="396" height="196" rx="2" className="found-border-rect" />
             </g>
           </svg>
+          <button className="found-close" onClick={() => setShowInventory(false)}>&times;</button>
           <div className="found-content">
             {foundObjectDetails.map(obj => (
               <div key={obj.id} className="found-object">
@@ -228,13 +229,17 @@ export function Game() {
         </div>
       </div>
 
+      {currentTown && statusText && (
+        <span className="status">{statusText}</span>
+      )}
+
       {currentTown && (
         <p className="town-desc">{TOWN_DESCRIPTIONS[currentTown.id]}</p>
       )}
 
       {currentTown && !dialogue && npcName && (
         <button className="talk-btn" onClick={handleTalk}>
-          talk to {npcName}
+          Talk to {npcName}
         </button>
       )}
 
@@ -242,6 +247,7 @@ export function Game() {
         <DialoguePanel townId={player.currentTownId} />
       )}
 
+      {/* Trading UI hidden for now
       {currentTown && !dialogue && (
         <div className="market">
           <div className="market-row market-header">
@@ -273,6 +279,7 @@ export function Game() {
           ))}
         </div>
       )}
+      */}
 
 
       {!currentTown && player.inventory.length > 0 && (
@@ -287,7 +294,6 @@ export function Game() {
       )}
 
       <div className="footer">
-        <span className="status">{statusText || '\u00a0'}</span>
         {travelState && (() => {
           const startTick = tick - travelState.ticksElapsed;
           return (
@@ -297,18 +303,6 @@ export function Game() {
             </>
           );
         })()}
-        <div className="controls">
-          <button
-            className="play-dot"
-            onClick={togglePause}
-            style={{ backgroundColor: isPaused ? 'var(--muted)' : '#00d26a' }}
-            aria-label={isPaused ? 'Play' : 'Pause'}
-          />
-          <button className="reset-btn" onClick={handleReset}>
-            reset
-          </button>
-        </div>
-        <ApiKeyInput />
       </div>
     </main>
   );

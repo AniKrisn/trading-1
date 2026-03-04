@@ -1,15 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { useWorldStore } from '@/store/worldStore';
 import { processDialogue } from '@/narrative/dialogue';
-import { createAnthropicClient, createMockClient, getStoredApiKey } from '@/narrative/llmClient';
+import { getLLMClient } from '@/narrative/llmClient';
 import { CHARACTER_BY_TOWN } from '@/data/characters';
 import { CONSTITUTION } from '@/data/constitution';
 import type { TownId } from '@/types';
-
-function getLLMClient() {
-  const key = getStoredApiKey();
-  return key ? createAnthropicClient(key) : createMockClient();
-}
 
 export function DialoguePanel({ townId }: { townId: TownId }) {
   const [input, setInput] = useState('');

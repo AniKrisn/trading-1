@@ -1,12 +1,12 @@
 import type { LLMClient, LLMMessage } from '../types/narrative';
 
 /* ------------------------------------------------------------------ */
-/*  Anthropic client (raw fetch)                                       */
+/*  Anthropic client (via Vite proxy — key stays server-side)          */
 /* ------------------------------------------------------------------ */
 
 const DEFAULT_MODEL = 'claude-haiku-4-5-20251001';
 
-export function createAnthropicClient(apiKey: string): LLMClient {
+export function createProxyClient(): LLMClient {
   return {
     async complete(
       messages: LLMMessage[],
@@ -27,13 +27,10 @@ export function createAnthropicClient(apiKey: string): LLMClient {
         body.system = options.system;
       }
 
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('/api/anthropic/v1/messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
         },
         body: JSON.stringify(body),
       });
@@ -45,7 +42,6 @@ export function createAnthropicClient(apiKey: string): LLMClient {
 
       const data = await response.json();
 
-      // Return first text content block
       const textBlock = data.content?.find(
         (block: { type: string }) => block.type === 'text',
       );
@@ -93,31 +89,11 @@ export function createMockClient(): LLMClient {
 }
 
 /* ------------------------------------------------------------------ */
-/*  API key storage                                                    */
+/*  Client factory                                                     */
 /* ------------------------------------------------------------------ */
 
-const API_KEY_STORAGE_KEY = 'anthropic-api-key';
-
-export function getStoredApiKey(): string | null {
-  try {
-    return localStorage.getItem(API_KEY_STORAGE_KEY);
-  } catch {
-    return null;
-  }
-}
-
-export function setStoredApiKey(key: string): void {
-  try {
-    localStorage.setItem(API_KEY_STORAGE_KEY, key);
-  } catch {
-    // localStorage unavailable — silently fail
-  }
-}
-
-export function clearStoredApiKey(): void {
-  try {
-    localStorage.removeItem(API_KEY_STORAGE_KEY);
-  } catch {
-    // localStorage unavailable — silently fail
-  }
+export function getLLMClient(): LLMClient {
+  // In dev, the Vite proxy handles the API key server-side.
+  // If no key is configured, the proxy will get a 401 and we fall through.
+  return createProxyClient();
 }

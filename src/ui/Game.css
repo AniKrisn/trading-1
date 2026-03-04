@@ -120,10 +120,7 @@
 .chart {
   display: flex;
   justify-content: center;
-  width: 48vw;
-  max-width: 580px;
-  margin-left: 50%;
-  transform: translateX(-50%);
+  width: 100%;
   position: relative;
 }
 
@@ -177,6 +174,13 @@
 
 .chart-compass circle {
   fill: var(--chart-compass);
+}
+
+.compass-ring {
+  fill: none;
+  stroke: var(--chart-compass);
+  stroke-width: 0.4;
+  opacity: 0.4;
 }
 
 .chart-compass text {
@@ -457,6 +461,8 @@
 .status {
   color: var(--muted);
   font-size: 0.8rem;
+  text-align: center;
+  margin-bottom: -1rem;
 }
 
 /* ---- Talk button ---- */
@@ -464,17 +470,18 @@
 .talk-btn {
   font-family: inherit;
   font-size: 0.8rem;
+  font-weight: 500;
   background: none;
   border: none;
-  color: var(--muted);
+  color: var(--text);
   cursor: pointer;
   padding: 0;
   text-align: center;
-  transition: color 0.15s;
+  transition: opacity 0.15s;
 }
 
 .talk-btn:hover {
-  color: var(--text);
+  opacity: 0.5;
 }
 
 /* ---- Dialogue panel ---- */
@@ -543,8 +550,7 @@
 }
 
 .dialogue-player {
-  color: var(--text);
-  opacity: 0.7;
+  color: var(--muted);
 }
 
 .dialogue-input-row {
@@ -571,6 +577,10 @@
 
 .map-wrap {
   position: relative;
+  width: 53vw;
+  max-width: 638px;
+  margin-left: 50%;
+  transform: translateX(-50%);
 }
 
 .map-fade {
@@ -584,10 +594,9 @@
 .found-objects {
   position: absolute;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.95);
-  width: 48vw;
-  max-width: 580px;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%) scale(0.95);
   z-index: 10;
   opacity: 0;
   pointer-events: none;
@@ -596,13 +605,13 @@
 
 .found-objects.found-open {
   opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
+  transform: translateY(-50%) scale(1);
   pointer-events: auto;
 }
 
 .found-objects.found-closed {
   opacity: 0;
-  transform: translate(-50%, -50%) scale(0.95);
+  transform: translateY(-50%) scale(0.95);
 }
 
 .found-border {
@@ -617,6 +626,25 @@
   stroke: var(--chart-route);
   stroke-width: 3;
   opacity: 0.4;
+}
+
+.found-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  font-family: inherit;
+  font-size: 1rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  z-index: 1;
+}
+
+.found-close:hover {
+  color: var(--text);
 }
 
 .found-content {
@@ -634,14 +662,14 @@
 
 .found-name {
   font-size: 0.8rem;
-  color: var(--muted);
+  color: var(--text);
 }
 
 .found-flavor {
   font-size: 0.75rem;
-  color: var(--muted);
+  color: var(--text);
   font-style: italic;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 /* ---- API key ---- */

@@ -2,17 +2,12 @@ import { useEffect, useRef } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { useWorldStore } from '@/store/worldStore';
 import { maybeTriggerCycle, runEntropyCheck } from '@/narrative/development';
-import { createAnthropicClient, createMockClient, getStoredApiKey } from '@/narrative/llmClient';
+import { getLLMClient } from '@/narrative/llmClient';
 import { CHARACTERS } from '@/data/characters';
 import { CONSTITUTION } from '@/data/constitution';
 import { ENTROPY_CHECK_INTERVAL } from '@/types/narrative';
 
 const BASE_TICK_MS = 1000; // 1 second per tick at speed 1
-
-function getLLMClient() {
-  const key = getStoredApiKey();
-  return key ? createAnthropicClient(key) : createMockClient();
-}
 
 export function useGameLoop() {
   const tickRef = useRef<number>(0);

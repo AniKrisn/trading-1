@@ -22,7 +22,7 @@ const CHART_POS: Record<TownId, { x: number; y: number }> = {
   'dustwatch':    { x: 62,  y: 76  },
   'port-hollow':  { x: 116, y: 188 },
   'silkmere':     { x: 206, y: 64  },
-  'ironkeep':     { x: 306, y: 92  },
+  'ironkeep':     { x: 306, y: 102 },
   'goldcrest':    { x: 360, y: 196 },
 };
 
@@ -79,9 +79,9 @@ const ISLAND_GOLDCREST =
   'M 326 182' +
   ' C 332 172, 346 168, 364 170' +
   ' C 380 172, 392 178, 394 188' +
-  ' C 396 198, 392 208, 382 214' +
-  ' C 372 220, 358 222, 346 218' +
-  ' C 336 214, 328 208, 326 200' +
+  ' C 396 198, 392 212, 382 220' +
+  ' C 372 226, 358 228, 346 224' +
+  ' C 336 220, 328 212, 326 200' +
   ' C 324 194, 324 188, 326 182 Z';
 
 const ISLET_GOLDCREST_SOUTH =
@@ -172,6 +172,11 @@ export function WorldMap({
             <feTurbulence type="turbulence" baseFrequency="0.03" numOctaves="5" seed={7} result="noise" />
             <feDisplacementMap in="SourceGraphic" in2="noise" scale="3.5" xChannelSelector="R" yChannelSelector="G" />
           </filter>
+          {/* Compass roughness — subtle */}
+          <filter id="ink-rough-compass" x="-4%" y="-4%" width="108%" height="108%">
+            <feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="3" seed={9} result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
           {/* Route roughness — higher frequency, heavier displacement */}
           <filter id="ink-rough-route" x="-8%" y="-8%" width="116%" height="116%">
             <feTurbulence type="turbulence" baseFrequency="0.06" numOctaves="3" seed={13} result="noise" />
@@ -233,11 +238,14 @@ export function WorldMap({
         ))}
 
         {/* Compass rose */}
-        <g className="chart-compass" transform="translate(405, 235)">
-          <line x1="0" y1="-10" x2="0" y2="10" />
-          <line x1="-10" y1="0" x2="10" y2="0" />
-          <circle r="1.5" />
-          <text x="0" y="-14" textAnchor="middle">N</text>
+        <g className="chart-compass" transform="translate(0, 235)">
+          <g filter="url(#ink-rough-compass)">
+            <line x1="0" y1="-13" x2="0" y2="13" />
+            <line x1="-13" y1="0" x2="13" y2="0" />
+            <circle r="4" className="compass-ring" />
+            <circle r="1" />
+          </g>
+          <text x="0" y="-17" textAnchor="middle">N</text>
         </g>
 
         {/* Trade routes (dashed) */}
