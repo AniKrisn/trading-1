@@ -8,6 +8,7 @@ interface WorldMapProps {
   reachable: { townId: TownId; distance: number }[];
   onTravel?: (townId: TownId) => void;
   tick: number;
+  mapTheme: 'dawn' | 'day' | 'dusk' | 'dark';
 }
 
 const TOWN_COLORS: Record<TownId, string> = {
@@ -33,6 +34,19 @@ const LABEL_OFFSET: Record<TownId, { dx: number; dy: number; anchor: string }> =
   'ironkeep':     { dx: 0,   dy: -8,  anchor: 'middle' },
   'goldcrest':    { dx: 0,   dy: 16,  anchor: 'middle' },
 };
+
+// --- Map border path ---
+
+const MAP_BORDER =
+  'M -22 6 C 60 0, 180 10, 396 5' +
+  ' L 424 30' +
+  ' C 430 100, 420 180, 424 254' +
+  ' C 340 260, 200 250, 80 258' +
+  ' L 68 248 L 74 258' +
+  ' C 30 256, -20 252, -24 256' +
+  ' C -30 190, -22 120, -26 60' +
+  ' L -18 52 L -26 44' +
+  ' C -24 28, -22 12, -22 6 Z';
 
 // --- Archipelago islands ---
 
@@ -157,6 +171,7 @@ export function WorldMap({
   reachable,
   onTravel,
   tick,
+  mapTheme,
   children,
 }: WorldMapProps & { children?: React.ReactNode }) {
   // Phantom islet appears roughly 15% of the time
@@ -164,7 +179,7 @@ export function WorldMap({
   const allIslands = showPhantom ? [...BASE_ISLANDS, PHANTOM_ISLET] : BASE_ISLANDS;
 
   return (
-    <div className="chart">
+    <div className="chart" data-map-theme={mapTheme}>
       <svg viewBox="-30 0 460 260" className="chart-svg">
         <defs>
           {/* Coastline roughness */}
@@ -189,34 +204,17 @@ export function WorldMap({
           </clipPath>
         </defs>
 
+        {/* Map background fill — sea color inside rough border */}
+        <path d={MAP_BORDER} className="chart-bg" />
+
         {/* Scraggly map border */}
         <g filter="url(#ink-rough-route)">
           {/* Drop shadow — offset right & down, uneven */}
           <g transform="translate(2.5, 3)" className="chart-shadow" clipPath="url(#shadow-clip)">
-            <path d={
-              'M -22 6 C 60 0, 180 10, 396 5' +
-              ' L 424 30' +
-              ' C 430 100, 420 180, 424 254' +
-              ' C 340 260, 200 250, 80 258' +
-              ' L 68 248 L 74 258' +
-              ' C 30 256, -20 252, -24 256' +
-              ' C -30 190, -22 120, -26 60' +
-              ' L -18 52 L -26 44' +
-              ' C -24 28, -22 12, -22 6 Z'
-            } />
+            <path d={MAP_BORDER} />
           </g>
           {/* Border with notched corner, nicks, and slight warp */}
-          <path d={
-            'M -22 6 C 60 0, 180 10, 396 5' +        /* top edge */
-            ' L 424 30' +                              /* dog ear cut */
-            ' C 430 100, 420 180, 424 254' +           /* right edge — slight bow */
-            ' C 340 260, 200 250, 80 258' +            /* bottom — wavier */
-            ' L 68 248 L 74 258' +                     /* small triangular nick, bottom-left area */
-            ' C 30 256, -20 252, -24 256' +
-            ' C -30 190, -22 120, -26 60' +            /* left edge — slight bow */
-            ' L -18 52 L -26 44' +                     /* small nick, left edge */
-            ' C -24 28, -22 12, -22 6 Z'
-          } className="chart-border" />
+          <path d={MAP_BORDER} className="chart-border" />
           <path d="M 396 5 L 424 4 L 424 30 Z" className="chart-dog-ear" />
         </g>
 

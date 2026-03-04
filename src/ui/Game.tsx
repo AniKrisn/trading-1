@@ -174,6 +174,8 @@ export function Game() {
 
   const [showInventory, setShowInventory] = useState(false);
 
+  const { theme: mapTheme, index: mapThemeIndex } = useMapTheme(travelState ? travelState.ticksElapsed : null);
+
   const statusText = lastLog?.message ?? '';
 
   return (
@@ -208,8 +210,9 @@ export function Game() {
             reachable={reachable}
             onTravel={dialogue ? undefined : travelAction}
             tick={tick}
+            mapTheme={mapTheme}
           >
-            <ThemeToggle ticksElapsed={travelState ? travelState.ticksElapsed : null} />
+            <ThemeClock themeIndex={mapThemeIndex} />
           </WorldMap>
         </div>
         <div className={`found-objects ${showInventory ? 'found-open' : 'found-closed'}`}>
@@ -310,25 +313,24 @@ export function Game() {
   );
 }
 
-const THEMES = ['dawn', 'day', 'dusk', 'dark'] as const;
-type Theme = typeof THEMES[number];
+const MAP_THEMES = ['dawn', 'day', 'dusk', 'dark'] as const;
+type MapTheme = typeof MAP_THEMES[number];
 
 const TICKS_PER_THEME = 4;
 
-function ThemeToggle({ ticksElapsed }: { ticksElapsed: number | null }) {
+function useMapTheme(ticksElapsed: number | null): { theme: MapTheme; index: number } {
   const [baseIndex, setBaseIndex] = useState(() => {
-    const saved = localStorage.getItem('theme') as Theme | null;
-    if (saved && (THEMES as readonly string[]).includes(saved)) return THEMES.indexOf(saved as Theme);
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 3 : 0;
+    const saved = localStorage.getItem('map-theme') as MapTheme | null;
+    if (saved && (MAP_THEMES as readonly string[]).includes(saved)) return MAP_THEMES.indexOf(saved as MapTheme);
+    return 0;
   });
 
-  // Track the last travel theme so we keep it when travel ends
-  const lastTravelIndex = useRef(baseIndex % THEMES.length);
+  const lastTravelIndex = useRef(baseIndex % MAP_THEMES.length);
   const wasTravel = useRef(false);
 
   let themeIndex: number;
   if (ticksElapsed !== null) {
-    themeIndex = (baseIndex + Math.floor(ticksElapsed / TICKS_PER_THEME)) % THEMES.length;
+    themeIndex = (baseIndex + Math.floor(ticksElapsed / TICKS_PER_THEME)) % MAP_THEMES.length;
     lastTravelIndex.current = themeIndex;
     wasTravel.current = true;
   } else {
@@ -336,16 +338,22 @@ function ThemeToggle({ ticksElapsed }: { ticksElapsed: number | null }) {
       setBaseIndex(lastTravelIndex.current);
       wasTravel.current = false;
     }
-    themeIndex = baseIndex % THEMES.length;
+    themeIndex = baseIndex % MAP_THEMES.length;
   }
 
-  const theme = THEMES[themeIndex];
+  const theme = MAP_THEMES[themeIndex];
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    if (ticksElapsed === null) localStorage.setItem('theme', theme);
+    if (ticksElapsed === null) localStorage.setItem('map-theme', theme);
+    // Drive page theme from map theme: light for dawn/day, dim for dusk/dark
+    const pageTheme = (theme === 'dusk' || theme === 'dark') ? 'dim' : 'light';
+    document.documentElement.setAttribute('data-theme', pageTheme);
   }, [theme, ticksElapsed]);
 
+  return { theme, index: themeIndex };
+}
+
+function ThemeClock({ themeIndex }: { themeIndex: number }) {
   const R = 14;
   const handLen = R - 4;
 
@@ -359,14 +367,11 @@ function ThemeToggle({ ticksElapsed }: { ticksElapsed: number | null }) {
       </defs>
       <g filter="url(#ink-clock)">
         <circle r={R} className="clock-face" />
-        {/* Inner decorative ring */}
         <circle r={R - 5} className="clock-ring" />
-        {/* Decorative pips at cardinal points */}
         {[0, 90, 180, 270].map(angle => {
           const rad = (angle - 90) * Math.PI / 180;
           return <circle key={`pip-${angle}`} cx={Math.cos(rad) * (R - 5)} cy={Math.sin(rad) * (R - 5)} r="0.6" className="clock-pip" />;
         })}
-        {/* Minor hour ticks (in-between) */}
         {[30, 60, 120, 150, 210, 240, 300, 330].map(angle => {
           const rad = (angle - 90) * Math.PI / 180;
           return (
@@ -380,7 +385,6 @@ function ThemeToggle({ ticksElapsed }: { ticksElapsed: number | null }) {
             />
           );
         })}
-        {/* Major ticks at 12, 3, 6, 9 */}
         {[0, 90, 180, 270].map(angle => {
           const rad = (angle - 90) * Math.PI / 180;
           return (
@@ -394,7 +398,6 @@ function ThemeToggle({ ticksElapsed }: { ticksElapsed: number | null }) {
             />
           );
         })}
-        {/* Hand */}
         {(() => {
           const rad = ((themeIndex % 4) * 90 - 90) * Math.PI / 180;
           return <line x1="0" y1="0" x2={Math.cos(rad) * handLen} y2={Math.sin(rad) * handLen} className="clock-hand" />;
@@ -404,3 +407,4 @@ function ThemeToggle({ ticksElapsed }: { ticksElapsed: number | null }) {
     </g>
   );
 }
+

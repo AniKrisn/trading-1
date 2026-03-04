@@ -6,17 +6,14 @@
     <title></title>
     <script>
       (function () {
-        const theme =
-          localStorage.getItem("theme") ||
-          (window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light");
-        document.documentElement.setAttribute("data-theme", theme);
+        // Page theme is driven by map theme at runtime;
+        // default to light to prevent flash
+        document.documentElement.setAttribute("data-theme", "light");
       })();
     </script>
     <style>
-      :root { --bg: #faf3e1; --text: #222; }
-      [data-theme="dark"] { --bg: #222; --text: #faf3e1; }
+      :root { --bg: #f0e8d4; --text: #222; }
+      [data-theme="dim"] { --bg: #3e3632; --text: #d8d0c4; }
       html, body { background-color: var(--bg); color: var(--text); }
     </style>
   </head>
