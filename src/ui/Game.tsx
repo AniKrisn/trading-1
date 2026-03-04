@@ -22,7 +22,6 @@ const weights = Object.fromEntries(
 
 export function Game() {
   useGameLoop();
-  const [tradeQty, setTradeQty] = useState<number>(1);
 
   const tick = useGameStore(s => s.tick);
   const player = useGameStore(s => s.player);
@@ -92,21 +91,12 @@ export function Game() {
     });
   }, [currentTown, player]);
 
-  const getEffectiveQty = (goodId: GoodId, action: 'buy' | 'sell') => {
-    const row = marketRows.find(r => r.goodId === goodId);
-    if (!row) return 0;
-    if (tradeQty === 0) return action === 'buy' ? row.maxBuy : row.held;
-    return tradeQty;
-  };
-
   const handleBuy = (goodId: GoodId) => {
-    const qty = getEffectiveQty(goodId, 'buy');
-    if (qty > 0) buyAction(goodId, qty);
+    buyAction(goodId, 1);
   };
 
   const handleSell = (goodId: GoodId) => {
-    const qty = getEffectiveQty(goodId, 'sell');
-    if (qty > 0) sellAction(goodId, qty);
+    sellAction(goodId, 1);
   };
 
   const buyClass = (price: number, base: number) => {
@@ -184,7 +174,7 @@ export function Game() {
 
   const [showInventory, setShowInventory] = useState(false);
 
-  const statusText = lastLog?.message ?? (isPaused ? 'click prices to trade' : '');
+  const statusText = lastLog?.message ?? '';
 
   return (
     <main className="game">
@@ -201,8 +191,33 @@ export function Game() {
             {showInventory ? 'close' : 'items'}
           </button>
         )}
-        {showInventory && (
-          <div className="found-objects">
+      </div>
+
+      <div className="map-wrap">
+        <div className={showInventory ? 'map-fade' : ''}>
+          <WorldMap
+            towns={towns}
+            routes={routes}
+            currentTownId={player.currentTownId}
+            travelState={travelState}
+            reachable={reachable}
+            onTravel={travelAction}
+            tick={tick}
+          />
+        </div>
+        <div className={`found-objects ${showInventory ? 'found-open' : 'found-closed'}`}>
+          <svg className="found-border" viewBox="0 0 400 200" preserveAspectRatio="none">
+            <defs>
+              <filter id="ink-rough-inv" x="-2%" y="-2%" width="104%" height="104%">
+                <feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="4" seed={7} result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" xChannelSelector="R" yChannelSelector="G" />
+              </filter>
+            </defs>
+            <g filter="url(#ink-rough-inv)">
+              <rect x="2" y="2" width="396" height="196" rx="2" className="found-border-rect" />
+            </g>
+          </svg>
+          <div className="found-content">
             {foundObjectDetails.map(obj => (
               <div key={obj.id} className="found-object">
                 <span className="found-name">{obj.name}</span>
@@ -210,18 +225,8 @@ export function Game() {
               </div>
             ))}
           </div>
-        )}
+        </div>
       </div>
-
-      <WorldMap
-        towns={towns}
-        routes={routes}
-        currentTownId={player.currentTownId}
-        travelState={travelState}
-        reachable={reachable}
-        onTravel={travelAction}
-        tick={tick}
-      />
 
       {currentTown && (
         <p className="town-desc">{TOWN_DESCRIPTIONS[currentTown.id]}</p>
@@ -269,19 +274,6 @@ export function Game() {
         </div>
       )}
 
-      {currentTown && !dialogue && (
-        <div className="qty-row">
-          {[1, 5, 10, 0].map(q => (
-            <button
-              key={q}
-              className={`qty-btn ${tradeQty === q ? 'active' : ''}`}
-              onClick={() => setTradeQty(q)}
-            >
-              {q === 0 ? 'max' : `\u00d7${q}`}
-            </button>
-          ))}
-        </div>
-      )}
 
       {!currentTown && player.inventory.length > 0 && (
         <div className="inventory">
@@ -322,23 +314,33 @@ export function Game() {
   );
 }
 
+const THEMES = ['dawn', 'day', 'dusk', 'dark'] as const;
+type Theme = typeof THEMES[number];
+
 function ThemeToggle() {
-  const [isDark, setIsDark] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved) return saved === 'dark';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const [theme, setTheme] = useState<Theme>(() => {
+    const saved = localStorage.getItem('theme') as Theme | null;
+    if (saved && THEMES.includes(saved)) return saved;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'dawn';
   });
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  }, [isDark]);
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const next = () => {
+    setTheme(t => THEMES[(THEMES.indexOf(t) + 1) % THEMES.length]);
+  };
 
   return (
-    <button
-      className="theme-dot"
-      onClick={() => setIsDark(!isDark)}
-      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-    />
+    <div className="theme-dots" onClick={next}>
+      {THEMES.map(t => (
+        <span
+          key={t}
+          className={`theme-dot${t === theme ? ' theme-dot-active' : ''}`}
+        />
+      ))}
+    </div>
   );
 }

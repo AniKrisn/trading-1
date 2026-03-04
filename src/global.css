@@ -23,29 +23,78 @@
   --coast-default: #1a1a2e;
 }
 
-[data-theme="dark"] {
-  --bg: #222;
-  --text: #faf3e1;
-  --muted: #666;
-  --grain-opacity: 0.3;
+[data-theme="day"] {
+  --bg: #f0ddc4;
+  --text: #2a1a0a;
+  --muted: #9a7a58;
+  --grain-opacity: 0.45;
+  --chart-land: #dcc8a4;
+  --chart-coast: #3a2010;
+  --chart-depth: #8a7050;
+  --chart-route: #5a4030;
+  --chart-compass: #3a2010;
+  --town-port-hollow: #3a6048;
+  --town-ironkeep: #6a4820;
+  --town-silkmere: #4a3848;
+  --town-goldcrest: #7a6a18;
+  --town-dustwatch: #6a3028;
+  --current-town: #5a3010;
+  --coast-0: #5a2818;
+  --coast-1: #2a4020;
+  --coast-2: #3a2838;
+  --coast-3: #4a3010;
+  --coast-4: #4a3810;
+  --coast-default: #3a2010;
+}
+
+[data-theme="dusk"] {
+  --bg: #3a3430;
+  --text: #c0b8a8;
+  --muted: #706860;
+  --grain-opacity: 0.25;
   --grain-blend: soft-light;
-  --chart-land: #2a2a28;
-  --chart-coast: #a0a0b0;
-  --chart-depth: #505048;
-  --chart-route: #707080;
-  --chart-compass: #a0a0b0;
-  --town-port-hollow: #6a9a80;
-  --town-ironkeep: #a08060;
-  --town-silkmere: #8a80a0;
-  --town-goldcrest: #b0a060;
-  --town-dustwatch: #a07070;
-  --current-town: #8ab0c0;
-  --coast-0: #b09090;
-  --coast-1: #80a890;
-  --coast-2: #9090b0;
-  --coast-3: #b0a080;
-  --coast-4: #b0a878;
-  --coast-default: #a0a0b0;
+  --chart-land: #423c38;
+  --chart-coast: #908070;
+  --chart-depth: #606050;
+  --chart-route: #707060;
+  --chart-compass: #908070;
+  --town-port-hollow: #488058;
+  --town-ironkeep: #888050;
+  --town-silkmere: #706860;
+  --town-goldcrest: #989038;
+  --town-dustwatch: #886048;
+  --current-town: #a09060;
+  --coast-0: #886050;
+  --coast-1: #488850;
+  --coast-2: #606860;
+  --coast-3: #888848;
+  --coast-4: #889040;
+  --coast-default: #908070;
+}
+
+[data-theme="dark"] {
+  --bg: #181c22;
+  --text: #c0c4c0;
+  --muted: #484848;
+  --grain-opacity: 0.2;
+  --grain-blend: soft-light;
+  --chart-land: #1e2228;
+  --chart-coast: #707880;
+  --chart-depth: #383e48;
+  --chart-route: #505860;
+  --chart-compass: #707880;
+  --town-port-hollow: #4a7868;
+  --town-ironkeep: #786850;
+  --town-silkmere: #606878;
+  --town-goldcrest: #887840;
+  --town-dustwatch: #785050;
+  --current-town: #5888a0;
+  --coast-0: #785858;
+  --coast-1: #508068;
+  --coast-2: #586878;
+  --coast-3: #787058;
+  --coast-4: #787848;
+  --coast-default: #707880;
 }
 
 *,

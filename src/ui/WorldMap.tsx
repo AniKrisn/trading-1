@@ -104,30 +104,10 @@ const BASE_ISLANDS = [
   ...ISLETS,
 ];
 
-// Subtle ink tints per island — dark base with a hint of color
-const COAST_TINTS = [
-  '#3a2020', // Dustwatch — warm rust ink
-  '#1a3020', // Port Hollow — forest ink
-  '#201a30', // Silkmere — indigo ink
-  '#302010', // Ironkeep — burnt sienna ink
-  '#302a10', // Goldcrest — raw umber ink
-  '#1a1a2e', // islet
-  '#1a1a2e', // islet
-  '#1a1a2e', // islet
-  '#1a1a2e', // islet
-];
-
-const COAST_TINTS_DARK = [
-  '#b09090', // Dustwatch
-  '#80a890', // Port Hollow
-  '#9090b0', // Silkmere
-  '#b0a080', // Ironkeep
-  '#b0a878', // Goldcrest
-  '#a0a0b0', // islet
-  '#a0a0b0', // islet
-  '#a0a0b0', // islet
-  '#a0a0b0', // islet
-];
+// CSS variable per island coast tint (0–4 = main islands, rest = default)
+function coastVar(i: number): string {
+  return i < 5 ? `var(--coast-${i})` : 'var(--coast-default)';
+}
 
 // Base depth soundings
 const DEPTHS = [
@@ -180,7 +160,7 @@ export function WorldMap({
 
   return (
     <div className="chart">
-      <svg viewBox="0 0 400 236" className="chart-svg">
+      <svg viewBox="-30 0 460 260" className="chart-svg">
         <defs>
           {/* Coastline roughness */}
           <filter id="ink-rough" x="-4%" y="-4%" width="108%" height="108%">
@@ -192,7 +172,43 @@ export function WorldMap({
             <feTurbulence type="turbulence" baseFrequency="0.06" numOctaves="3" seed={13} result="noise" />
             <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
           </filter>
+          {/* Clip shadow to bottom-right only */}
+          <clipPath id="shadow-clip">
+            <rect x="-30" y="130" width="470" height="140" />
+            <rect x="200" y="0" width="240" height="270" />
+          </clipPath>
         </defs>
+
+        {/* Scraggly map border */}
+        <g filter="url(#ink-rough-route)">
+          {/* Drop shadow — offset right & down, uneven */}
+          <g transform="translate(2.5, 3)" className="chart-shadow" clipPath="url(#shadow-clip)">
+            <path d={
+              'M -22 6 C 60 0, 180 10, 396 5' +
+              ' L 424 30' +
+              ' C 430 100, 420 180, 424 254' +
+              ' C 340 260, 200 250, 80 258' +
+              ' L 68 248 L 74 258' +
+              ' C 30 256, -20 252, -24 256' +
+              ' C -30 190, -22 120, -26 60' +
+              ' L -18 52 L -26 44' +
+              ' C -24 28, -22 12, -22 6 Z'
+            } />
+          </g>
+          {/* Border with notched corner, nicks, and slight warp */}
+          <path d={
+            'M -22 6 C 60 0, 180 10, 396 5' +        /* top edge */
+            ' L 424 30' +                              /* dog ear cut */
+            ' C 430 100, 420 180, 424 254' +           /* right edge — slight bow */
+            ' C 340 260, 200 250, 80 258' +            /* bottom — wavier */
+            ' L 68 248 L 74 258' +                     /* small triangular nick, bottom-left area */
+            ' C 30 256, -20 252, -24 256' +
+            ' C -30 190, -22 120, -26 60' +            /* left edge — slight bow */
+            ' L -18 52 L -26 44' +                     /* small nick, left edge */
+            ' C -24 28, -22 12, -22 6 Z'
+          } className="chart-border" />
+          <path d="M 396 5 L 424 4 L 424 30 Z" className="chart-dog-ear" />
+        </g>
 
         {/* Islands — fill + stroke */}
         {allIslands.map((d, i) => (
@@ -200,7 +216,7 @@ export function WorldMap({
         ))}
         <g filter="url(#ink-rough)">
           {allIslands.map((d, i) => (
-            <path key={`coast-${i}`} className="chart-coast" d={d} />
+            <path key={`coast-${i}`} className="chart-coast" d={d} stroke={coastVar(i)} />
           ))}
         </g>
 
@@ -245,23 +261,26 @@ export function WorldMap({
 
           return (
             <g key={id}>
-              {isCurrent && (
+              {/* Rough circles */}
+              <g filter="url(#ink-rough)">
+                {isCurrent && (
+                  <circle
+                    cx={pos.x} cy={pos.y} r={9}
+                    className="chart-ring"
+                    stroke={TOWN_COLORS[id]}
+                  />
+                )}
                 <circle
-                  cx={pos.x} cy={pos.y} r={9}
-                  className="chart-ring"
-                  stroke={TOWN_COLORS[id]}
+                  cx={pos.x} cy={pos.y} r={4}
+                  fill={TOWN_COLORS[id]}
+                  className={
+                    isReachable ? 'chart-dot chart-dot-reachable' :
+                    isCurrent ? 'chart-dot' : 'chart-dot chart-dot-dim'
+                  }
+                  onClick={isReachable ? () => onTravel(id) : undefined}
+                  style={isReachable ? { cursor: 'pointer' } : undefined}
                 />
-              )}
-              <circle
-                cx={pos.x} cy={pos.y} r={4}
-                fill={TOWN_COLORS[id]}
-                className={
-                  isReachable ? 'chart-dot chart-dot-reachable' :
-                  isCurrent ? 'chart-dot' : 'chart-dot chart-dot-dim'
-                }
-                onClick={isReachable ? () => onTravel(id) : undefined}
-                style={isReachable ? { cursor: 'pointer' } : undefined}
-              />
+              </g>
               <text
                 x={pos.x + label.dx}
                 y={pos.y + label.dy}
@@ -286,7 +305,11 @@ export function WorldMap({
           const t = travelState.ticksElapsed / travelState.ticksTotal;
           const cx = from.x + (to.x - from.x) * t;
           const cy = from.y + (to.y - from.y) * t;
-          return <circle cx={cx} cy={cy} r={3.5} className="chart-player" />;
+          return (
+            <g filter="url(#ink-rough)">
+              <circle cx={cx} cy={cy} r={3.5} className="chart-player" />
+            </g>
+          );
         })()}
       </svg>
     </div>
