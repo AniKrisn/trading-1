@@ -192,8 +192,8 @@ export function Game() {
       </div>
 
       <button
-        className={`talk-btn ${currentTown && npcName && !dialogue ? '' : 'talk-btn-hidden'}`}
-        onClick={currentTown && npcName && !dialogue ? handleTalk : undefined}
+        className={`talk-btn ${currentTown && npcName && !dialogue && !showInventory ? '' : 'talk-btn-hidden'}`}
+        onClick={currentTown && npcName && !dialogue && !showInventory ? handleTalk : undefined}
       >
         {currentTown && npcName ? `Talk to ${npcName}` : '\u00A0'}
       </button>
