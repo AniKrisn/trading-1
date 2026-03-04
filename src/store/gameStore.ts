@@ -11,9 +11,6 @@ const basePrices = Object.fromEntries(
   Object.entries(GOODS).map(([id, g]) => [id, g.basePrice])
 ) as Record<GoodId, number>;
 
-const weights = Object.fromEntries(
-  Object.entries(GOODS).map(([id, g]) => [id, g.weight])
-) as Record<GoodId, number>;
 
 interface GameActions {
   doTick: () => void;
@@ -58,7 +55,7 @@ export const useGameStore = create<GameStore>()(
       const state = get();
       if (!state.player.currentTownId) return;
       const town = state.towns[state.player.currentTownId];
-      const result = buyGood(state.player, town, goodId, quantity, weights);
+      const result = buyGood(state.player, town, goodId, quantity);
       if ('error' in result) {
         set(s => { s.log.push({ tick: s.tick, message: `Buy failed: ${result.error}` }); });
         return;

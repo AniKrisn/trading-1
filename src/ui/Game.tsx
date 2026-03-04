@@ -4,7 +4,6 @@ import { useWorldStore } from '@/store/worldStore';
 import { useGameLoop } from './useGameLoop';
 import { GOODS, GOOD_IDS } from '@/data/goods';
 import { getBuyPrice, getSellPrice } from '@/engine/market';
-import { getCargoUsed, getCargoFree } from '@/engine/trade';
 import { TOWN_DESCRIPTIONS } from '@/data/descriptions';
 import { pickPassage } from '@/data/voyages';
 import { CHARACTER_BY_TOWN } from '@/data/characters';
@@ -16,9 +15,6 @@ import { DialoguePanel } from './DialoguePanel';
 import type { GoodId, TownId } from '@/types';
 import './Game.css';
 
-const weights = Object.fromEntries(
-  Object.entries(GOODS).map(([id, g]) => [id, g.weight])
-) as Record<GoodId, number>;
 
 export function Game() {
   useGameLoop();
@@ -46,10 +42,6 @@ export function Game() {
   const currentTown = player.currentTownId ? towns[player.currentTownId] : null;
   const travelState = player.travelState;
 
-  const cargoUsed = useMemo(
-    () => getCargoUsed(player.inventory, weights),
-    [player.inventory],
-  );
 
   const lastLog = log.length > 0 ? log[log.length - 1] : null;
 
@@ -69,7 +61,6 @@ export function Game() {
       const entry = currentTown.market[goodId];
       const inv = player.inventory.find(i => i.goodId === goodId);
       const buyPrice = getBuyPrice(entry);
-      const freeSpace = getCargoFree(player, weights);
       return {
         goodId,
         name: GOODS[goodId].name,
@@ -83,7 +74,6 @@ export function Game() {
           Math.min(
             Math.floor(entry.supply),
             Math.floor(player.gold / buyPrice),
-            Math.floor(freeSpace / GOODS[goodId].weight),
           ),
         ),
       };
@@ -180,18 +170,19 @@ export function Game() {
 
   return (
     <main className="game">
-      <div className="header">
-        <span className="gold">{player.gold}g</span>
-        <span className="cargo">{cargoUsed}/{player.cargoCapacity}</span>
-        {foundObjectDetails.length > 0 && (
-          <button
-            className="inv-btn"
-            onClick={() => setShowInventory(!showInventory)}
-          >
-            {showInventory ? 'Close' : 'Items'}
-          </button>
-        )}
-      </div>
+
+      {foundObjectDetails.length > 0 && !travelState && (
+        <div
+          className="pouch-hitbox"
+          onClick={() => setShowInventory(!showInventory)}
+        >
+          <img
+            src="/sack.svg"
+            alt="Items"
+            className="pouch-icon"
+          />
+        </div>
+      )}
 
       <button
         className={`talk-btn ${currentTown && npcName && !dialogue && !showInventory ? '' : 'talk-btn-hidden'}`}
@@ -229,6 +220,7 @@ export function Game() {
           </svg>
           <button className="found-close" onClick={() => setShowInventory(false)}>&times;</button>
           <div className="found-content">
+            <span className="found-gold">{player.gold}g</span>
             {foundObjectDetails.map(obj => (
               <div key={obj.id} className="found-object">
                 <span className="found-name">{obj.name}</span>
@@ -248,7 +240,7 @@ export function Game() {
         <span className="status">{statusText}</span>
       )}
 
-      {currentTown && (
+      {currentTown && !showInventory && !dialogue && (
         <p className="town-desc">{TOWN_DESCRIPTIONS[currentTown.id]}</p>
       )}
 

@@ -74,6 +74,8 @@ export function buildDialogueContext(
     '',
     `[INSTRUCTIONS]`,
     `Respond as ${characterDef.name}. 2-3 sentences max. Stay in character.`,
+    `Put action/description in *asterisks* before the spoken dialogue. Example: *She glances up from her ledger.* About time you showed up.`,
+    `Do not use quotation marks around dialogue.`,
   );
 
   return parts.join('\n');

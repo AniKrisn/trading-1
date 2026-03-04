@@ -7,15 +7,6 @@ export interface TradeResult {
   totalCost: number;
 }
 
-/** Calculate total cargo weight used by inventory items */
-export function getCargoUsed(inventory: InventoryItem[], weights: Record<GoodId, number>): number {
-  return inventory.reduce((sum, item) => sum + item.quantity * weights[item.goodId], 0);
-}
-
-/** Calculate remaining cargo capacity */
-export function getCargoFree(player: Player, weights: Record<GoodId, number>): number {
-  return player.cargoCapacity - getCargoUsed(player.inventory, weights);
-}
 
 /** Buy a quantity of a good from a town's market */
 export function buyGood(
@@ -23,7 +14,6 @@ export function buyGood(
   town: Town,
   goodId: GoodId,
   quantity: number,
-  weights: Record<GoodId, number>,
 ): TradeResult | { error: string } {
   const entry = town.market[goodId];
   const unitPrice = getBuyPrice(entry);
@@ -32,9 +22,6 @@ export function buyGood(
   if (quantity <= 0) return { error: 'Invalid quantity' };
   if (quantity > entry.supply) return { error: 'Not enough supply' };
   if (totalCost > player.gold) return { error: 'Not enough gold' };
-
-  const cargoNeeded = quantity * weights[goodId];
-  if (cargoNeeded > getCargoFree(player, weights)) return { error: 'Not enough cargo space' };
 
   // Update player inventory
   const newInventory = [...player.inventory];

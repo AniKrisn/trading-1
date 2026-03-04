@@ -41,7 +41,7 @@ export interface Player {
   gold: number;
   currentTownId: TownId | null; // null when traveling
   inventory: InventoryItem[];
-  cargoCapacity: number;
+
   travelState: TravelState | null;
 }
 

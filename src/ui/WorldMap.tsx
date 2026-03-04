@@ -122,6 +122,45 @@ const BASE_ISLANDS = [
   ...ISLETS,
 ];
 
+// --- Contour lines (inset paths per main island) ---
+
+const CONTOURS: string[][] = [
+  // Dustwatch — 2 contours
+  [
+    'M 50 74 C 52 66, 62 62, 72 64 C 78 66, 80 72, 78 76 C 76 78, 72 78, 68 78 C 64 80, 60 84, 54 86 C 48 88, 42 82, 42 78 C 42 76, 46 74, 50 74 Z',
+    'M 56 72 C 58 68, 64 66, 68 68 C 72 70, 72 74, 70 76 C 66 78, 60 78, 56 76 C 52 74, 54 72, 56 72 Z',
+  ],
+  // Port Hollow — 2 contours
+  [
+    'M 88 182 C 92 174, 100 168, 112 166 C 122 164, 132 166, 138 172 C 144 178, 146 186, 142 194 C 138 200, 132 204, 124 206 C 116 208, 108 206, 100 202 C 94 198, 90 194, 88 190 C 84 188, 84 184, 88 182 Z',
+    'M 98 186 C 100 180, 106 176, 114 174 C 120 174, 126 176, 130 180 C 134 184, 134 190, 130 196 C 126 200, 120 200, 114 200 C 108 198, 102 194, 100 192 C 96 190, 96 188, 98 186 Z',
+  ],
+  // Silkmere — 2 contours
+  [
+    'M 180 60 C 184 52, 194 48, 206 48 C 216 50, 228 54, 232 62 C 236 68, 234 74, 228 78 C 222 82, 214 82, 204 80 C 196 76, 186 70, 182 66 C 178 64, 178 62, 180 60 Z',
+    'M 190 62 C 192 58, 200 54, 208 56 C 214 58, 220 62, 222 66 C 224 70, 222 74, 218 76 C 212 78, 206 76, 200 74 C 196 72, 192 68, 190 64 C 188 64, 188 62, 190 62 Z',
+  ],
+  // Ironkeep — 2 contours
+  [
+    'M 280 86 C 284 78, 296 72, 308 74 C 318 76, 326 80, 330 88 C 332 94, 330 104, 324 110 C 318 116, 310 120, 300 118 C 294 116, 298 110, 302 104 C 304 98, 300 94, 294 96 C 288 98, 284 100, 280 104 C 276 100, 276 92, 280 86 Z',
+    'M 290 88 C 294 82, 302 78, 310 80 C 316 82, 322 86, 324 92 C 326 98, 322 104, 318 108 C 312 112, 306 112, 302 110 C 300 108, 302 104, 306 98 C 308 94, 304 90, 298 92 C 294 94, 290 94, 290 88 Z',
+  ],
+  // Goldcrest — 2 contours
+  [
+    'M 332 186 C 336 178, 348 174, 362 176 C 376 178, 386 182, 388 190 C 390 198, 386 208, 378 214 C 370 220, 358 220, 348 218 C 340 214, 334 208, 332 200 C 330 196, 330 190, 332 186 Z',
+    'M 340 192 C 342 186, 352 182, 362 184 C 372 186, 378 190, 380 196 C 380 202, 376 208, 370 212 C 364 214, 356 214, 350 210 C 344 206, 340 200, 340 196 C 338 194, 338 194, 340 192 Z',
+  ],
+];
+
+// Main islands that get contours + ink pooling (indices 0-4)
+const MAIN_ISLAND_PATHS = [
+  ISLAND_DUSTWATCH,
+  ISLAND_PORT_HOLLOW,
+  ISLAND_SILKMERE,
+  ISLAND_IRONKEEP,
+  ISLAND_GOLDCREST,
+];
+
 // CSS variable per island coast tint (0–4 = main islands, rest = default)
 function coastVar(i: number): string {
   return i < 5 ? `var(--coast-${i})` : 'var(--coast-default)';
@@ -197,15 +236,62 @@ export function WorldMap({
             <feTurbulence type="turbulence" baseFrequency="0.06" numOctaves="3" seed={13} result="noise" />
             <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
           </filter>
+          {/* Ink pooling — inner shadow along coast */}
+          <filter id="ink-pool" x="-10%" y="-10%" width="120%" height="120%">
+            <feMorphology in="SourceGraphic" operator="erode" radius="2" result="eroded" />
+            <feGaussianBlur in="eroded" stdDeviation="2.5" result="blurred" />
+            <feComposite in="SourceGraphic" in2="blurred" operator="out" result="edge" />
+            <feColorMatrix type="matrix" in="edge" result="dark"
+              values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" />
+            <feComposite in="dark" in2="SourceGraphic" operator="in" />
+          </filter>
           {/* Clip shadow to bottom-right only */}
           <clipPath id="shadow-clip">
             <rect x="-30" y="130" width="470" height="140" />
             <rect x="200" y="0" width="240" height="270" />
           </clipPath>
+          {/* Sea clip — map border minus islands */}
+          <clipPath id="sea-clip">
+            <path d={MAP_BORDER} />
+          </clipPath>
+          <mask id="sea-mask">
+            <rect x="-30" y="0" width="460" height="260" fill="white" />
+            {allIslands.map((d, i) => (
+              <path key={`mask-${i}`} d={d} fill="black" />
+            ))}
+          </mask>
         </defs>
 
         {/* Map background fill — sea color inside rough border */}
         <path d={MAP_BORDER} className="chart-bg" />
+
+        {/* Sea hatching — wavy crosshatch lines */}
+        <g clipPath="url(#sea-clip)" mask="url(#sea-mask)" filter="url(#ink-rough-compass)" className="chart-waves">
+          {/* Horizontal */}
+          {Array.from({ length: 9 }, (_, i) => {
+            const y = 10 + i * 28;
+            const amp = 1.2;
+            const freq = 0.015 + (i % 3) * 0.003;
+            let d = `M -30 ${y}`;
+            for (let x = -30; x <= 430; x += 8) {
+              const dy = Math.sin(x * freq + i * 1.7) * amp;
+              d += ` L ${x} ${y + dy}`;
+            }
+            return <path key={`wh-${i}`} d={d} />;
+          })}
+          {/* Vertical */}
+          {Array.from({ length: 16 }, (_, i) => {
+            const x = -20 + i * 28;
+            const amp = 1.2;
+            const freq = 0.018 + (i % 3) * 0.003;
+            let d = `M ${x} 0`;
+            for (let y = 0; y <= 260; y += 8) {
+              const dx = Math.sin(y * freq + i * 2.1) * amp;
+              d += ` L ${x + dx} ${y}`;
+            }
+            return <path key={`wv-${i}`} d={d} />;
+          })}
+        </g>
 
         {/* Scraggly map border */}
         <g filter="url(#ink-rough-route)">
@@ -218,10 +304,25 @@ export function WorldMap({
           <path d="M 396 5 L 424 4 L 424 30 Z" className="chart-dog-ear" />
         </g>
 
-        {/* Islands — fill + stroke */}
+        {/* Islands — fill */}
         {allIslands.map((d, i) => (
           <path key={`land-${i}`} className="chart-land" d={d} />
         ))}
+        {/* Ink pooling — dark inner edge on main islands */}
+        {MAIN_ISLAND_PATHS.map((d, i) => (
+          <g key={`pool-${i}`} filter="url(#ink-pool)" className="chart-ink-pool">
+            <path d={d} fill={coastVar(i)} />
+          </g>
+        ))}
+        {/* Contour lines */}
+        <g filter="url(#ink-rough)" className="chart-contours">
+          {CONTOURS.map((rings, i) =>
+            rings.map((d, j) => (
+              <path key={`contour-${i}-${j}`} d={d} stroke={coastVar(i)} />
+            ))
+          )}
+        </g>
+        {/* Coastline stroke */}
         <g filter="url(#ink-rough)">
           {allIslands.map((d, i) => (
             <path key={`coast-${i}`} className="chart-coast" d={d} stroke={coastVar(i)} />
@@ -322,9 +423,10 @@ export function WorldMap({
           );
         })()}
         {/* Clock — scales with map like compass */}
-        <g transform="translate(392, 38) scale(0.9)">
+        <g transform="translate(392, 38) scale(0.99)">
           {children}
         </g>
+
       </svg>
     </div>
   );

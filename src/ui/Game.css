@@ -1,13 +1,13 @@
 /* ---- Layout ---- */
 
 .game {
-  font-family: "Geist Mono", monospace;
-  font-size: 0.9rem;
+  font-family: "IM Fell English", serif;
+  font-size: 1.15rem;
   line-height: 1.6;
   max-width: 42ch;
   margin: 0 auto;
   padding: 1.5rem;
-  padding-top: 10vh;
+  padding-top: 8vh;
   display: flex;
   flex-direction: column;
   gap: 1.6rem;
@@ -71,37 +71,6 @@
   opacity: 0.4;
 }
 
-/* ---- Header ---- */
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  position: relative;
-}
-
-.gold {
-  font-weight: 400;
-}
-
-.cargo {
-  color: var(--muted);
-}
-
-.inv-btn {
-  font-family: inherit;
-  font-size: 0.8rem;
-  background: none;
-  border: none;
-  color: var(--muted);
-  cursor: pointer;
-  padding: 0;
-  transition: color 0.15s;
-}
-
-.inv-btn:hover {
-  color: var(--text);
-}
 
 /* ---- Chart (nautical map) ---- */
 
@@ -140,6 +109,14 @@
   opacity: 0.085;
 }
 
+.chart-waves path {
+  fill: none;
+  stroke: var(--chart-depth);
+  stroke-width: 0.4;
+  opacity: 0.06;
+  stroke-linecap: round;
+}
+
 .chart-land {
   fill: var(--chart-land);
 }
@@ -150,6 +127,18 @@
   stroke-width: 1.6;
   stroke-linejoin: round;
   stroke-linecap: round;
+}
+
+.chart-ink-pool {
+  opacity: 0.22;
+}
+
+.chart-contours path {
+  fill: none;
+  stroke-width: 0.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.15;
 }
 
 .chart-depth {
@@ -236,6 +225,8 @@
   opacity: 0.5;
 }
 
+/* ---- Map HUD (gold & items) ---- */
+
 .chart-label-dist {
   fill: var(--muted);
   font-size: 8px;
@@ -247,7 +238,7 @@
 .town-desc {
   text-align: center;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   font-style: italic;
   line-height: 1.5;
 }
@@ -256,7 +247,7 @@
 
 .voyage-text {
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   font-style: italic;
 }
 
@@ -299,7 +290,7 @@
 }
 
 .market-header > span {
-  font-size: 0.8rem;
+  font-size: 1rem;
 }
 
 .market-sep {
@@ -349,7 +340,7 @@
   color: var(--muted);
   justify-self: end;
   text-align: right;
-  font-size: 0.85rem;
+  font-size: 1.05rem;
 }
 
 /* ---- Quantity ---- */
@@ -385,12 +376,14 @@
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  font-size: 1.05rem;
 }
 
 .inv-row {
   display: flex;
   gap: 1ch;
   align-items: baseline;
+  font-size: 1.05rem;
 }
 
 .inv-qty {
@@ -449,15 +442,45 @@
 
 .status {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   text-align: center;
   margin-bottom: -1rem;
+}
+
+/* ---- Pouch icon ---- */
+
+.pouch-hitbox {
+  width: 60px;
+  height: 70px;
+  overflow: hidden;
+  align-self: center;
+  cursor: pointer;
+  margin-top: -1.6rem;
+  margin-bottom: -2rem;
+}
+
+.pouch-hitbox:hover .pouch-icon {
+  opacity: 0.85;
+}
+
+.pouch-icon {
+  width: 124px;
+  height: 124px;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+  pointer-events: none;
+  margin-top: -38px;
+  margin-left: -32px;
+}
+
+[data-theme="dim"] .pouch-icon {
+  filter: invert(1);
 }
 
 /* ---- Talk button ---- */
 
 .talk-btn {
-  font-family: inherit;
+  font-family: "Geist Mono", monospace;
   font-size: 0.8rem;
   font-weight: 500;
   background: none;
@@ -465,7 +488,7 @@
   color: var(--text);
   cursor: pointer;
   padding: 0;
-  margin-top: 0.8rem;
+  margin-top: 0.9rem;
   margin-bottom: -0.8rem;
   text-align: center;
   transition: opacity 0.15s;
@@ -486,10 +509,24 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  border-top: 1px solid var(--muted);
-  border-bottom: 1px solid var(--muted);
+  border: none;
   padding: 0.75rem 0;
+  position: relative;
 }
+
+.dialogue-panel::before,
+.dialogue-panel::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--muted);
+  filter: url(#ink-rough-line);
+}
+
+.dialogue-panel::before { top: 0; }
+.dialogue-panel::after { bottom: 0; }
 
 .dialogue-header {
   display: flex;
@@ -509,6 +546,7 @@
 .dialogue-role {
   color: var(--muted);
   font-size: 0.75rem;
+  margin-bottom: 0.4rem;
 }
 
 .dialogue-close {
@@ -536,9 +574,17 @@
 }
 
 .dialogue-turn {
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   font-weight: 500;
   line-height: 1.5;
+}
+
+.dialogue-action {
+  display: block;
+  font-style: italic;
+  color: var(--text);
+  opacity: 0.7;
+  margin-bottom: 0.15rem;
 }
 
 .dialogue-speaker {
@@ -547,23 +593,36 @@
 
 .dialogue-player {
   color: var(--muted);
+  margin-top: 0.4rem;
+  margin-bottom: 0.4rem;
 }
 
 .dialogue-input-row {
   display: flex;
   gap: 0.5ch;
+  position: relative;
 }
 
 .dialogue-field {
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   background: none;
   border: none;
-  border-bottom: 1px solid var(--muted);
   color: var(--text);
   outline: none;
   flex: 1;
   padding: 0.2rem 0;
+}
+
+.dialogue-input-row::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--muted);
+  filter: url(#ink-rough-line);
 }
 
 .dialogue-field::placeholder {
@@ -674,18 +733,27 @@
   padding: 1rem 1.5rem;
 }
 
+.found-gold {
+  font-size: 1rem;
+  color: #c4882a;
+}
+
+[data-theme="dim"] .found-gold {
+  color: #d4a245;
+}
+
 .found-object {
   display: flex;
   flex-direction: column;
 }
 
 .found-name {
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: var(--text);
 }
 
 .found-flavor {
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   color: var(--text);
   font-style: italic;
   opacity: 0.6;

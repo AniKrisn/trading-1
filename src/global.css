@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=IM+Fell+English:ital@0;1&display=swap");
 
 @property --bg { syntax: '<color>'; inherits: true; initial-value: #faf3e1; }
 @property --text { syntax: '<color>'; inherits: true; initial-value: #222; }
@@ -157,6 +157,10 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+html {
+  zoom: 1.14;
 }
 
 html,

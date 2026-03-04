@@ -56,6 +56,19 @@ export function DialoguePanel({ townId }: { townId: TownId }) {
 
   if (!characterDef || !dialogue) return null;
 
+  // Split NPC text into action (*...*) and speech (rest), strip quotes
+  function parseNpcText(text: string): { action?: string; speech: string } {
+    const strip = (s: string) => s.replace(/^[""\u201c]+|[""\u201d]+$/g, '').trim();
+    const actionMatch = text.match(/^\s*\*([^*]+)\*\s*/);
+    if (actionMatch) {
+      return {
+        action: actionMatch[1].trim(),
+        speech: strip(text.slice(actionMatch[0].length)),
+      };
+    }
+    return { speech: strip(text) };
+  }
+
   return (
     <div className="dialogue-panel">
       <div className="dialogue-header">
@@ -66,14 +79,24 @@ export function DialoguePanel({ townId }: { townId: TownId }) {
         <button className="dialogue-close" onClick={endDialogue}>&times;</button>
       </div>
       <div className="dialogue-turns" ref={scrollRef}>
-        {dialogue.turns.map((turn, i) => (
-          <div key={i} className={`dialogue-turn dialogue-${turn.role}`}>
-            <span className="dialogue-speaker">
-              {turn.role === 'npc' ? characterDef.name : 'You'}:
-            </span>{' '}
-            {turn.content}
-          </div>
-        ))}
+        {dialogue.turns.map((turn, i) => {
+          if (turn.role === 'npc') {
+            const { action, speech } = parseNpcText(turn.content);
+            return (
+              <div key={i} className="dialogue-turn dialogue-npc">
+                {action && <span className="dialogue-action">{action}</span>}
+                <span className="dialogue-speaker">{characterDef.name}:</span>{' '}
+                {speech}
+              </div>
+            );
+          }
+          return (
+            <div key={i} className="dialogue-turn dialogue-player">
+              <span className="dialogue-speaker">You:</span>{' '}
+              {turn.content}
+            </div>
+          );
+        })}
         {loading && (
           <div className="dialogue-turn dialogue-npc">
             <span className="dialogue-speaker">{characterDef.name}:</span> ...
