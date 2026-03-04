@@ -191,15 +191,22 @@ export function Game() {
         )}
       </div>
 
+      <button
+        className={`talk-btn ${currentTown && npcName && !dialogue ? '' : 'talk-btn-hidden'}`}
+        onClick={currentTown && npcName && !dialogue ? handleTalk : undefined}
+      >
+        {currentTown && npcName ? `Talk to ${npcName}` : '\u00A0'}
+      </button>
+
       <div className="map-wrap">
-        <div className={showInventory ? 'map-fade' : ''}>
+        <div className={showInventory || dialogue ? 'map-fade' : ''}>
           <WorldMap
             towns={towns}
             routes={routes}
             currentTownId={player.currentTownId}
             travelState={travelState}
             reachable={reachable}
-            onTravel={travelAction}
+            onTravel={dialogue ? undefined : travelAction}
             tick={tick}
           >
             <ThemeToggle ticksElapsed={travelState ? travelState.ticksElapsed : null} />
@@ -227,6 +234,11 @@ export function Game() {
             ))}
           </div>
         </div>
+        <div className={`dialogue-overlay ${dialogue && player.currentTownId ? 'dialogue-open' : 'dialogue-closed'}`}>
+          {player.currentTownId && (
+            <DialoguePanel townId={player.currentTownId} />
+          )}
+        </div>
       </div>
 
       {currentTown && statusText && (
@@ -235,16 +247,6 @@ export function Game() {
 
       {currentTown && (
         <p className="town-desc">{TOWN_DESCRIPTIONS[currentTown.id]}</p>
-      )}
-
-      {currentTown && !dialogue && npcName && (
-        <button className="talk-btn" onClick={handleTalk}>
-          Talk to {npcName}
-        </button>
-      )}
-
-      {dialogue && player.currentTownId && (
-        <DialoguePanel townId={player.currentTownId} />
       )}
 
       {/* Trading UI hidden for now

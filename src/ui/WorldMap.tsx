@@ -6,7 +6,7 @@ interface WorldMapProps {
   currentTownId: TownId | null;
   travelState: TravelState | null;
   reachable: { townId: TownId; distance: number }[];
-  onTravel: (townId: TownId) => void;
+  onTravel?: (townId: TownId) => void;
   tick: number;
 }
 
@@ -290,8 +290,8 @@ export function WorldMap({
                     isReachable ? 'chart-dot chart-dot-reachable' :
                     isCurrent ? 'chart-dot' : 'chart-dot chart-dot-dim'
                   }
-                  onClick={isReachable ? () => onTravel(id) : undefined}
-                  style={isReachable ? { cursor: 'pointer' } : undefined}
+                  onClick={isReachable && onTravel ? () => onTravel(id) : undefined}
+                  style={isReachable && onTravel ? { cursor: 'pointer' } : undefined}
                 />
               </g>
               <text

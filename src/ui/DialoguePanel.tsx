@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useWorldStore } from '@/store/worldStore';
 import { processDialogue } from '@/narrative/dialogue';
 import { getLLMClient } from '@/narrative/llmClient';
@@ -18,9 +18,9 @@ export function DialoguePanel({ townId }: { townId: TownId }) {
   const updateCharacter = useWorldStore(s => s.updateCharacter);
 
   const characterDef = CHARACTER_BY_TOWN[townId];
-  if (!characterDef || !dialogue) return null;
 
-  const handleSend = async () => {
+  const handleSend = useCallback(async () => {
+    if (!characterDef || !dialogue) return;
     const message = input.trim();
     if (!message || loading) return;
 
@@ -30,7 +30,6 @@ export function DialoguePanel({ townId }: { townId: TownId }) {
 
     try {
       const client = getLLMClient();
-      // Get fresh world state after adding player turn
       const freshState = useWorldStore.getState();
       const result = await processDialogue(freshState, characterDef, message, client, CONSTITUTION);
 
@@ -46,14 +45,16 @@ export function DialoguePanel({ townId }: { townId: TownId }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [input, loading, characterDef, dialogue, addDialogueTurn, addPlayerMemory, updateCharacter]);
 
   // Auto-scroll to bottom
   useEffect(() => {
-    if (scrollRef.current) {
+    if (scrollRef.current && dialogue) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [dialogue.turns]);
+  }, [dialogue?.turns]);
+
+  if (!characterDef || !dialogue) return null;
 
   return (
     <div className="dialogue-panel">
