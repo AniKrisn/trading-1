@@ -83,7 +83,7 @@
   --text: #c0b8a8;
   --muted: #706860;
   --grain-opacity: 0.25;
-  --grain-blend: soft-light;
+
   --chart-land: #423c38;
   --chart-coast: #584838;
   --chart-depth: #606050;
@@ -108,7 +108,7 @@
   --text: #c0c4c0;
   --muted: #484848;
   --grain-opacity: 0.2;
-  --grain-blend: soft-light;
+
   --chart-land: #1e2228;
   --chart-coast: #707880;
   --chart-depth: #383e48;
