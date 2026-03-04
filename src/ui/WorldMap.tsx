@@ -323,8 +323,11 @@ export function WorldMap({
             </g>
           );
         })()}
+        {/* Clock — scales with map like compass */}
+        <g transform="translate(392, 38) scale(0.9)">
+          {children}
+        </g>
       </svg>
-      {children}
     </div>
   );
 }

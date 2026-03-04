@@ -30,18 +30,6 @@
 /* ---- Theme clock ---- */
 
 .theme-clock {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 72px;
-  height: 72px;
-  cursor: pointer;
-  transition: transform 0.15s;
-  z-index: 2;
-}
-
-.theme-clock:hover {
-  transform: scale(1.05);
 }
 
 .clock-face {

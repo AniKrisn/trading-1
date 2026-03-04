@@ -350,7 +350,7 @@ function ThemeToggle({ ticksElapsed }: { ticksElapsed: number | null }) {
   const handLen = R - 4;
 
   return (
-    <svg className="theme-clock" viewBox="-26 -26 52 52" onClick={() => setBaseIndex(i => i + 1)}>
+    <g className="theme-clock">
       <defs>
         <filter id="ink-clock" x="-8%" y="-8%" width="116%" height="116%">
           <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="4" seed={11} result="noise" />
@@ -401,6 +401,6 @@ function ThemeToggle({ ticksElapsed }: { ticksElapsed: number | null }) {
         })()}
         <circle r="1.5" className="clock-center" />
       </g>
-    </svg>
+    </g>
   );
 }
