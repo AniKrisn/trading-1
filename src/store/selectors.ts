@@ -2,21 +2,10 @@ import type { GameStore } from './gameStore';
 import type { GoodId, TownId } from '@/types';
 import { GOODS, GOOD_IDS } from '@/data/goods';
 import { getBuyPrice, getSellPrice } from '@/engine/market';
-import { getCargoUsed, getCargoFree } from '@/engine/trade';
 import { findRoute } from '@/engine/travel';
-
-const weights: Record<GoodId, number> = Object.fromEntries(
-  Object.entries(GOODS).map(([id, g]) => [id, g.weight])
-) as Record<GoodId, number>;
 
 export const selectCurrentTown = (state: GameStore) =>
   state.player.currentTownId ? state.towns[state.player.currentTownId] : null;
-
-export const selectCargoUsed = (state: GameStore) =>
-  getCargoUsed(state.player.inventory, weights);
-
-export const selectCargoFree = (state: GameStore) =>
-  getCargoFree(state.player, weights);
 
 export interface MarketRow {
   goodId: GoodId;
@@ -27,7 +16,6 @@ export interface MarketRow {
   playerQty: number;
   avgPurchasePrice: number;
   maxAffordable: number;
-  maxFittable: number;
 }
 
 export const selectMarketRows = (state: GameStore): MarketRow[] => {
@@ -39,7 +27,6 @@ export const selectMarketRows = (state: GameStore): MarketRow[] => {
     const buyPrice = getBuyPrice(entry);
     const sellPrice = getSellPrice(entry);
     const inv = state.player.inventory.find(i => i.goodId === goodId);
-    const freeSpace = getCargoFree(state.player, weights);
 
     return {
       goodId,
@@ -50,7 +37,6 @@ export const selectMarketRows = (state: GameStore): MarketRow[] => {
       playerQty: inv?.quantity ?? 0,
       avgPurchasePrice: inv?.avgPurchasePrice ?? 0,
       maxAffordable: Math.floor(state.player.gold / buyPrice),
-      maxFittable: Math.floor(freeSpace / GOODS[goodId].weight),
     };
   });
 };

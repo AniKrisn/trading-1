@@ -21,7 +21,7 @@ export function buyGood(
 
   if (quantity <= 0) return { error: 'Invalid quantity' };
   if (quantity > entry.supply) return { error: 'Not enough supply' };
-  if (totalCost > player.gold) return { error: 'Not enough gold' };
+  if (totalCost > player.gold) return { error: 'Not enough obols' };
 
   // Update player inventory
   const newInventory = [...player.inventory];

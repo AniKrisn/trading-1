@@ -143,7 +143,7 @@ export function createInitialState(): GameState {
     towns,
     routes: ROUTES,
     player: {
-      gold: 20,
+      gold: 4,
       currentTownId: 'port-hollow',
       inventory: [],
 

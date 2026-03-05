@@ -6,7 +6,7 @@ import { CHARACTER_BY_TOWN } from '@/data/characters';
 import { CONSTITUTION } from '@/data/constitution';
 import type { TownId } from '@/types';
 
-export function DialoguePanel({ townId }: { townId: TownId }) {
+export function DialoguePanel({ townId, onClose }: { townId: TownId; onClose?: () => void }) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -76,7 +76,7 @@ export function DialoguePanel({ townId }: { townId: TownId }) {
           <span className="dialogue-name">{characterDef.name}</span>
           <span className="dialogue-role">{characterDef.role}</span>
         </div>
-        <button className="dialogue-close" onClick={endDialogue}>&times;</button>
+        <button className="dialogue-close" onClick={onClose || endDialogue}>&times;</button>
       </div>
       <div className="dialogue-turns" ref={scrollRef}>
         {dialogue.turns.map((turn, i) => {

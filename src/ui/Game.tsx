@@ -163,6 +163,32 @@ export function Game() {
   }, [discoveredObjects]);
 
   const [showInventory, setShowInventory] = useState(false);
+  const [dialogueClosing, setDialogueClosing] = useState(false);
+
+  const closeDialogue = useCallback(() => {
+    if (dialogueClosing) return;
+    setDialogueClosing(true);
+    setTimeout(() => {
+      endDialogue();
+    }, 250);
+  }, [endDialogue, dialogueClosing]);
+
+  // Reset closing state when dialogue actually clears
+  useEffect(() => {
+    if (!dialogue) setDialogueClosing(false);
+  }, [dialogue]);
+
+  // Esc to close items or dialogue
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showInventory) setShowInventory(false);
+        else if (dialogue && !dialogueClosing) closeDialogue();
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [showInventory, dialogue, dialogueClosing, closeDialogue]);
 
   const { theme: mapTheme, index: mapThemeIndex } = useMapTheme(travelState ? travelState.ticksElapsed : null);
 
@@ -171,18 +197,16 @@ export function Game() {
   return (
     <main className="game">
 
-      {foundObjectDetails.length > 0 && !travelState && (
-        <div
-          className="pouch-hitbox"
-          onClick={() => setShowInventory(!showInventory)}
-        >
-          <img
-            src="/sack.svg"
-            alt="Items"
-            className="pouch-icon"
-          />
-        </div>
-      )}
+      <div
+        className={`pouch-hitbox ${foundObjectDetails.length > 0 && !travelState && !dialogue ? '' : 'pouch-hidden'}`}
+        onClick={foundObjectDetails.length > 0 && !travelState && !dialogue ? () => setShowInventory(!showInventory) : undefined}
+      >
+        <img
+          src="/sack.svg"
+          alt="Items"
+          className="pouch-icon"
+        />
+      </div>
 
       <button
         className={`talk-btn ${currentTown && npcName && !dialogue && !showInventory ? '' : 'talk-btn-hidden'}`}
@@ -192,7 +216,7 @@ export function Game() {
       </button>
 
       <div className="map-wrap">
-        <div className={showInventory || dialogue ? 'map-fade' : ''}>
+        <div className={`map-container ${showInventory || (dialogue && !dialogueClosing) ? 'map-fade' : ''}`}>
           <WorldMap
             towns={towns}
             routes={routes}
@@ -220,7 +244,7 @@ export function Game() {
           </svg>
           <button className="found-close" onClick={() => setShowInventory(false)}>&times;</button>
           <div className="found-content">
-            <span className="found-gold">{player.gold}g</span>
+            <span className="found-gold">{player.gold} obols</span>
             {foundObjectDetails.map(obj => (
               <div key={obj.id} className="found-object">
                 <span className="found-name">{obj.name}</span>
@@ -229,14 +253,14 @@ export function Game() {
             ))}
           </div>
         </div>
-        <div className={`dialogue-overlay ${dialogue && player.currentTownId ? 'dialogue-open' : 'dialogue-closed'}`}>
-          {player.currentTownId && (
-            <DialoguePanel townId={player.currentTownId} />
+        <div className={`dialogue-overlay ${dialogue && player.currentTownId && !dialogueClosing ? 'dialogue-open' : 'dialogue-closed'}`}>
+          {player.currentTownId && (dialogue || dialogueClosing) && (
+            <DialoguePanel townId={player.currentTownId} onClose={closeDialogue} />
           )}
         </div>
       </div>
 
-      {currentTown && statusText && (
+      {currentTown && statusText && !showInventory && !dialogue && (
         <span className="status">{statusText}</span>
       )}
 
